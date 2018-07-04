@@ -35,7 +35,10 @@ public class OnlineChargingFunctionMultiplicativeScheme implements ReservationSc
         if(hashtable.containsKey("reservationCount")) {
             j = (double)hashtable.get("reservationCount");
         }
+        System.out.printf("J : %5.0f\n", j);
+        System.out.printf("J : %5.0f\n", j);
+        double reservedGU = Math.ceil(j / this.c) * this.getDefaultGU(); 
         
-        return Math.ceil(j / this.c) * this.getDefaultGU();
+        return reservedGU;
     }
 }

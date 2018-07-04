@@ -16,7 +16,7 @@ public class GuReservationSimulator {
     static Scanner input = new Scanner(System.in);
     static ArrayList<UserEquipment> UeArr = new ArrayList<UserEquipment>();
     static OnlineChargingSystem OCS;
-    
+    static double defaultGU = 0;
 
     /**
      * @param args the command line arguments
@@ -64,33 +64,50 @@ public class GuReservationSimulator {
 //        }
         
         // stimulate that the devices send online charging request once
-        if(UeArr.size() * OCS.getOCF().determineGU(new Hashtable<String, Double>()) < OCS.getRemainingDataAllowance()) {
-            for(int i = 0; i < UeArr.size(); i++) {
-                UserEquipment ue = UeArr.get(i);
-                
-                ue.sendOnlineChargingRequestSessionStart();
-            }
-        }
+//        if(UeArr.size() * OCS.determineGU(new Hashtable<String, Double>()) < OCS.getRemainingDataAllowance()) {
+//            for(int i = 0; i < UeArr.size(); i++) {
+//                UserEquipment ue = UeArr.get(i);
+//                
+//                ue.sendOnlineChargingRequestSessionStart();
+//            }
+//        }
         
         // consume GU, stimulate that the devices keep consuming GU until the data allowance becomes 0 or less that default GU.
-        double defaultGU = OCS.getOCF().determineGU(new Hashtable<String, Double>());
+//        double defaultGU = OCS.determineGU(new Hashtable<String, Double>());
+//        int deviceCount = 0;
+//        while(OCS.getRemainingDataAllowance() >= defaultGU) {
+//            double randomConsumedGU = Math.random() * 2 * defaultGU;
+//            System.out.printf("Random GU : %5.2f\n", randomConsumedGU);
+//            UserEquipment ue = UeArr.get(deviceCount);
+//            deviceCount = (deviceCount + 1) % UeArr.size();
+//            
+//            System.out.printf("Remaining data allowance : %10.2f\n", OCS.getRemainingDataAllowance());
+//            
+//            ue.consumeGU(randomConsumedGU);
+//        }
+        
+        // the remaining data allowance is not enough, so sessions terminate
+//        for(int i = 0; i < UeArr.size(); i++) {
+//            UserEquipment ue = UeArr.get(i);
+//            
+//            ue.sendOnlineChargingRequestSessionEnd();
+//        }
+        
+        // stimulate that there are lots of sessions should be completed
+        System.out.print("Enter the random GU range ( > 0) : ");
+        double randomRange = input.nextDouble();
+        
         int deviceCount = 0;
-        while(OCS.getRemainingDataAllowance() >= OCS.getOCF().determineGU(new Hashtable<String, Double>())) {
-            double randomConsumedGU = Math.random() * 2 * defaultGU;
+        while(OCS.getRemainingDataAllowance() >= defaultGU) {
+            double randomConsumedGU = Math.random() * randomRange * defaultGU;
             System.out.printf("Random GU : %5.2f\n", randomConsumedGU);
+            
             UserEquipment ue = UeArr.get(deviceCount);
             deviceCount = (deviceCount + 1) % UeArr.size();
             
+            ue.completeSession(randomConsumedGU);
+            
             System.out.printf("Remaining data allowance : %10.2f\n", OCS.getRemainingDataAllowance());
-            
-            ue.consumeGU(randomConsumedGU);
-        }
-        
-        // the remaining data allowance is not enough, so sessions terminate
-        for(int i = 0; i < UeArr.size(); i++) {
-            UserEquipment ue = UeArr.get(i);
-            
-            ue.sendOnlineChargingRequestSessionEnd();
         }
         
         
@@ -111,7 +128,7 @@ public class GuReservationSimulator {
     // configure the fixed scheme
     private static OnlineChargingSystem fixedScheme(double totalDataAllowance) {
         System.out.print("Enter the default GU(MB) for fixed scheme : ");
-        double defaultGU = input.nextDouble();
+        defaultGU = input.nextDouble();
         System.out.println("");
         
         // configure online charging function for fixed scheme
@@ -127,7 +144,7 @@ public class GuReservationSimulator {
 
     private static OnlineChargingSystem multiplicativeScheme(double totalDataAllowance) {
         System.out.print("Enter default GU(MB) : ");
-        double defaultGU = input.nextDouble();
+        defaultGU = input.nextDouble();
         System.out.println("");
         
         System.out.print("Enter C : ");

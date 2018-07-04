@@ -45,7 +45,7 @@ public class UserEquipment {
         this.producedSignals = producedSignals;
     }
     
-    // a completed session, giving a grantes unit that a session needs
+    // a completed session, giving a granted unit that a session needs
     public void completeSession(double sessionTotalGU) {
         this.sendOnlineChargingRequestSessionStart();
         this.consumeGU(sessionTotalGU);
@@ -55,7 +55,7 @@ public class UserEquipment {
     
     // session start, requesting GU
     public void sendOnlineChargingRequestSessionStart() {
-        System.out.println("sendOnlineChargingRequest");
+        System.out.println("sendOnlineChargingRequestSessionStart");
         
         // call next function, the parameter is a signals counter, it will return the number of signals
         Hashtable hashtable = this.OCS.receiveOnlineChargingRequestSessionStart(1);
@@ -78,12 +78,14 @@ public class UserEquipment {
     public void consumeGU(double consumedGU) {
 //        Hashtable<String, Double> hashtable = new Hashtable<String, Double>();
         
-        if(this.getCurrentGU() < consumedGU && this.getCurrentGU() > 0) {
-            // current GU is positive and it is enough for this activity
+        if(this.getCurrentGU() > consumedGU) {
+            // current GU is positive and enough for this activity
             this.setCurrentGU(this.getCurrentGU() - consumedGU);
             System.out.printf("Enough Current device remaining GU : %5.1f\n", this.getCurrentGU());
         }else {
             // trigger online charging request to ask for new GU, since current GU is not enough
+        	System.out.printf("Not Enough Current device remaining GU : %5.1f\n", this.getCurrentGU());
+        	
             int reservationCount = 0;
             do {
                 // to continue session
@@ -92,12 +94,12 @@ public class UserEquipment {
             
             // consume GU
             this.setCurrentGU(this.getCurrentGU() - consumedGU);
-            System.out.printf("Not Enough Current device remaining GU : %5.1f\n", this.getCurrentGU());
         }
     }
     
     // session continue, requesting GU
     public void sendOnlineChargingRequestSessionContinue(double reservationCount) {
+    	System.out.println("sendOnlineChargingRequestSessionContinue");
         
         // send the online charging request, so the initial number of signals is 1
         Hashtable<String, Double> hashtable = this.OCS.receiveOnlineChargingRequestSessionContinue(1, reservationCount);
@@ -117,6 +119,8 @@ public class UserEquipment {
     
     // session end
     public void sendOnlineChargingRequestSessionEnd() {
+    	System.out.println("sendOnlineChargingRequestSessionEnd");
+    	
         // send the online charging request, so the initial number of signals is 1
         Hashtable<String, Double> hashtable = this.OCS.receiveOnlineChargingRequestSessionEnd(1);
         
