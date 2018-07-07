@@ -7,26 +7,56 @@
 
 import java.util.ArrayList;
 import java.util.Hashtable;
-
-
-
 /**
  *
  * @author Socrates
  */
 public class UserEquipment {
+	// Basic variables
     private int ueID;
     private OnlineChargingSystem OCS;
     private double currentGU;
     private double producedSignals = 0;
+    
+    // store a single period of allocated GUs
     ArrayList<Double> allocatedGUs;
     
+    // store multiple periods' allocated GUs
+    ArrayList<SinglePeriodAllocatedGUs> periodAllocatedRecords;
     
+    // IRS variables
+    // total demand per month, Unit : MB 
+    double totalDemand;
+    // periodical data usage
+    double periodicalDataUsage;
+    // charging periods, unit : day
+    double chargingPeriods;
+    // data collection time, unit : hour
+    double dataCollectionPeriod;
+    // cycle time, report interval
+    double cycleTime;
+    
+    // constructor for FS or MS
     public UserEquipment(int ID, OnlineChargingSystem OCS) {
         this.ueID = ID;
         this.OCS = OCS;
         this.currentGU = 0;
         this.allocatedGUs = new ArrayList<Double>();
+        this.periodAllocatedRecords = new ArrayList<SinglePeriodAllocatedGUs>();
+    }
+    
+    // constructor for IRS
+    public UserEquipment(int ID, OnlineChargingSystem OCS, double chargingPeriods, double dataCollectionPeriod, double cycleTime) {
+    	this.ueID = ID;
+    	this.OCS = OCS;
+    	this.currentGU = 0;
+    	this.allocatedGUs = new ArrayList<Double>();
+        this.periodAllocatedRecords = new ArrayList<SinglePeriodAllocatedGUs>();
+    	
+    	// change days to hours
+    	this.chargingPeriods = chargingPeriods * 24;
+    	this.dataCollectionPeriod = dataCollectionPeriod;
+    	this.cycleTime = cycleTime;
     }
 
     public double getCurrentGU() {
@@ -45,11 +75,47 @@ public class UserEquipment {
         this.producedSignals = producedSignals;
     }
     
+    // compute IRS variables
+    // compute periodical data usage
+    public double computePeriodicalDataUsage(double totalDemand, double periods) {
+    	// formula : current total data usage / current time periods
+    	
+    	return totalDemand / periods;
+    }
+    
+    // compute total demand in a charging period
+    public double computeTotalDemand() {
+    	// formula : current total data usage / current time periods * charging periods
+    	return 0.0;
+    }
+    
+    // Functions
+    
+    // return current status, including remaining GU of UE and the average data rate
+    public Hashtable reportCurrentStatus() {
+    	Hashtable<String, Double> hashtable = new Hashtable<String, Double>();
+    	
+    	// how to define average data rate ?
+    	double avgDataRate = Math.random() * 10;
+    	hashtable.put("avgDataRate", avgDataRate);
+    	hashtable.put("remaining", this.currentGU);
+    	
+    	return hashtable;
+    }
+    
     // a completed session, giving a granted unit that a session needs
-    public void completeSession(double sessionTotalGU) {
+    public void completeSession(double sessionTotalGU, double timePeriod) {
         this.sendOnlineChargingRequestSessionStart();
         this.consumeGU(sessionTotalGU);
         this.sendOnlineChargingRequestSessionEnd();
+        
+        // add those allocated GUs into a single record
+        this.periodAllocatedRecords.add(new SinglePeriodAllocatedGUs(timePeriod, this.allocatedGUs));
+        
+        // report current status to OCS after report interval
+        if(timePeriod % this.cycleTime == 0) {
+        	reportCurrentStatus();
+        }
     }
     
     
@@ -71,7 +137,7 @@ public class UserEquipment {
         double allocatedGU = (double) hashtable.get("reservedGU");
         this.setCurrentGU(this.getCurrentGU() + allocatedGU);
         // add the allocated GU to the list
-        this.allocatedGUs.add(currentGU);
+        this.allocatedGUs.add(allocatedGU);
     }
     
     // consuming granted unit
@@ -107,6 +173,7 @@ public class UserEquipment {
         double reservedGU = (double) hashtable.get("reservedGU");
         
         this.setCurrentGU(this.getCurrentGU() + reservedGU);
+        this.allocatedGUs.add(reservedGU);
         
         double numOfSignals = hashtable.get("numOfSignals");
         System.out.printf("Number of signals : %3.0f\n", numOfSignals);

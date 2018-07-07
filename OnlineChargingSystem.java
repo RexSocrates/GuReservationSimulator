@@ -145,4 +145,9 @@ public class OnlineChargingSystem {
         
         return hashtable;
     }
+    
+    // receiving the current status of user equipment
+    public void receiveCurrentStatus(Hashtable hashtable) {
+    	
+    }
 }

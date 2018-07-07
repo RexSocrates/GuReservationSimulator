@@ -5,6 +5,8 @@
  */
 
 import java.util.Scanner;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Hashtable;
 
@@ -20,16 +22,27 @@ public class GuReservationSimulator {
 
     /**
      * @param args the command line arguments
+     * @throws FileNotFoundException 
      */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws FileNotFoundException {
         // TODO code application logic here
+//    	readFile();
+    	
         int numOfDevices = 0;
         System.out.print("Enter the number of devices : ");
         numOfDevices = input.nextInt();
         System.out.println("");
         
-        System.out.println("1. Fixed scheme");
-        System.out.println("2. Multiplicative scheme");
+        // print reservation scheme options
+        String[] reservationSchemes = {
+        		"Fixed scheme",
+        		"Multiplicative scheme",
+        		"Inventory-based Reservation Scheme"
+        };
+        
+        for(int i = 0; i < reservationSchemes.length; i++) {
+        	System.out.printf("%2d . %s\n", i+1, reservationSchemes[i]);
+        }
         System.out.print("Choose the reservation scheme : ");
         int option = input.nextInt();
         System.out.println("");
@@ -44,60 +57,21 @@ public class GuReservationSimulator {
                 break;
             case 2 : OCS = multiplicativeScheme(totalDataAllowance);
                 break;
+            case 3 : OCS = inventoryBasedReservationScheme(totalDataAllowance);
+            	break;
         }
         
         // add the user equipments into the array
-        for(int i = 0; i <= numOfDevices; i++) {
-            UeArr.add(new UserEquipment(i, OCS));
-        }
-        
-        // stimulate that the UEs keep sending online charging request util the data allowance becomes 0.
-//        int deviceCount = 0;
-//        while(OCS.getABMF().getRemainingDataAllowance() >= OCS.getOCF().determineGU()) {
-//            UserEquipment ue = UeArr.get(deviceCount);
-//            deviceCount = (deviceCount + 1) % UeArr.size();
-//            
-//            ue.sendOnlineChargingRequest();
-//            System.out.printf("Number of signals : %5.0f\n", ue.getProducedSignals());
-//            System.out.printf("Remaining data allowance : %10.2f\n", OCS.getABMF().getRemainingDataAllowance());
-//            System.out.println("");
-//        }
-        
-        // stimulate that the devices send online charging request once
-//        if(UeArr.size() * OCS.determineGU(new Hashtable<String, Double>()) < OCS.getRemainingDataAllowance()) {
-//            for(int i = 0; i < UeArr.size(); i++) {
-//                UserEquipment ue = UeArr.get(i);
-//                
-//                ue.sendOnlineChargingRequestSessionStart();
-//            }
-//        }
-        
-        // consume GU, stimulate that the devices keep consuming GU until the data allowance becomes 0 or less that default GU.
-//        double defaultGU = OCS.determineGU(new Hashtable<String, Double>());
-//        int deviceCount = 0;
-//        while(OCS.getRemainingDataAllowance() >= defaultGU) {
-//            double randomConsumedGU = Math.random() * 2 * defaultGU;
-//            System.out.printf("Random GU : %5.2f\n", randomConsumedGU);
-//            UserEquipment ue = UeArr.get(deviceCount);
-//            deviceCount = (deviceCount + 1) % UeArr.size();
-//            
-//            System.out.printf("Remaining data allowance : %10.2f\n", OCS.getRemainingDataAllowance());
-//            
-//            ue.consumeGU(randomConsumedGU);
-//        }
-        
-        // the remaining data allowance is not enough, so sessions terminate
-//        for(int i = 0; i < UeArr.size(); i++) {
-//            UserEquipment ue = UeArr.get(i);
-//            
-//            ue.sendOnlineChargingRequestSessionEnd();
-//        }
+        initializeUserEquipments(numOfDevices, option);
         
         // stimulate that there are lots of sessions should be completed
         System.out.print("Enter the random GU range ( > 0) : ");
         double randomRange = input.nextDouble();
         
+        // a variable to change device index
         int deviceCount = 0;
+        // stimulate that time is moving
+        double timePeriod = 0;
         while(OCS.getRemainingDataAllowance() >= defaultGU) {
             double randomConsumedGU = Math.random() * randomRange * defaultGU;
             System.out.printf("Random GU : %5.2f\n", randomConsumedGU);
@@ -105,7 +79,12 @@ public class GuReservationSimulator {
             UserEquipment ue = UeArr.get(deviceCount);
             deviceCount = (deviceCount + 1) % UeArr.size();
             
-            ue.completeSession(randomConsumedGU);
+            ue.completeSession(randomConsumedGU, timePeriod);
+            
+            // randomly determine that the time move
+            if(Math.random() * 10 >= 5) {
+            	System.out.println("Time counter : " + timePeriod++);
+            }
             
             System.out.printf("Remaining data allowance : %10.2f\n", OCS.getRemainingDataAllowance());
         }
@@ -113,20 +92,114 @@ public class GuReservationSimulator {
         
         
         // get total signals of this operation
-        double totalSignals = 0;
-        for(int i = 0; i < UeArr.size(); i++) {
-            UserEquipment ue = UeArr.get(i);
-            
-            double signals = ue.getProducedSignals();
-            totalSignals += signals;
-            System.out.printf("Signals : %5.0f\n", signals);
-        }
-        System.out.printf("Total signals : %f\n", totalSignals);
+        countTotalSignals(UeArr);
+        
+        // print experiment configuration
+        System.out.printf("Number of devices : %d\n", numOfDevices);
+        System.out.printf("Reservation scheme : %s\n", reservationSchemes[option - 1]);
+        System.out.printf("Monthly data allowance : %3.0f\n", totalDataAllowance);
+        System.out.printf("Consumed GU random range : %3.0f\n", randomRange);
+        System.out.printf("Default GU : %5.0f\n", defaultGU);
         
     }
+    
+    private static void initializeUserEquipments(int numOfDevices, int option) {
+    	double dataCollectionPeriods = 0;
+    	double cycleTime = 0;
+    	double chargingPeriods = 0;
+    	if(option == 3) {
+    		// enter some variable that IRS needs
+    		System.out.print("Enter data collection periods(hour) : ");
+        	dataCollectionPeriods = input.nextDouble();
+        	System.out.println("");
+        	
+        	System.out.print("Enter cycle time(report interval, hour) : ");
+        	cycleTime = input.nextDouble();
+        	System.out.println("");
+        	
+        	System.out.print("Enter the charging period(days) : ");
+        	chargingPeriods = input.nextDouble();
+        	System.out.println("");
+    	}
+    	
+		for(int i = 0; i < numOfDevices; i++) {
+			if(option == 1 || option == 2) {
+				// fixed scheme or multiplicative scheme
+				UeArr.add(new UserEquipment(i, OCS));
+			}else if(option == 3) {
+				// Inventory-based reservation scheme
+				UeArr.add(new UserEquipment(i, OCS, chargingPeriods, dataCollectionPeriods, cycleTime));
+			}
+		}
+	}
 
-    // configure the fixed scheme
+	// File IO Functions
+	private static void readFile() throws FileNotFoundException {
+//		String[] fileNames = {
+//				"2013_11_01.csv",
+//				"2013_11_02.csv",
+//				"2013_11_03.csv",
+//				"2013_11_04.csv",
+//				"2013_11_05.csv",
+//				"2013_11_06.csv",
+//				"2013_11_07.csv",
+//		};
+		
+		File file = new File("2013_11_01.csv");
+		Scanner inputFile = new Scanner(file);
+		
+		// remove title
+		inputFile.nextLine();
+		
+		long counter = 0;
+		while(inputFile.hasNextLine()) {
+			String dateStr = inputFile.next();
+			String record = inputFile.nextLine();
+			System.out.println("Counter : " + ++counter);
+//			System.out.println(record);
+			
+			
+			// split the single tuple
+			String[] data = record.split(",");
+			for(int i = 0; i < data.length; i++) {
+				if(i == 0) {
+					System.out.printf("Time : %s\n", data[i]);
+				}else if(i == 1) {
+					System.out.printf("Cell ID : %s\n", data[i]);
+				}else {
+					System.out.printf("Data : %s\n", data[i]);
+				}
+			}
+			
+			System.out.println("");
+			if(counter >= 80000) {
+				break;
+			}
+		}
+		
+		inputFile.close();
+		
+	}
+	
+	// Count functions
+	private static void countTotalSignals(ArrayList<UserEquipment> devicesArr) {
+		double totalSignals = 0;
+		
+		for(int i = 0; i < devicesArr.size(); i++) {
+			UserEquipment device = devicesArr.get(i);
+			
+			double signals = device.getProducedSignals();
+			totalSignals += signals;
+			System.out.printf("Signals : %3.0f\n", signals);
+		}
+		System.out.printf("Total signals : %5.0f\n", totalSignals);
+		
+	}
+	
+
+	// configure the reservation schemes
     private static OnlineChargingSystem fixedScheme(double totalDataAllowance) {
+    	// hyper-parameters
         System.out.print("Enter the default GU(MB) for fixed scheme : ");
         defaultGU = input.nextDouble();
         System.out.println("");
@@ -143,7 +216,8 @@ public class GuReservationSimulator {
     }
 
     private static OnlineChargingSystem multiplicativeScheme(double totalDataAllowance) {
-        System.out.print("Enter default GU(MB) : ");
+    	// hyper-parameters
+        System.out.print("Enter default GU(MB) for multiplicative scheme : ");
         defaultGU = input.nextDouble();
         System.out.println("");
         
@@ -161,5 +235,32 @@ public class GuReservationSimulator {
         return OCS;
         
     }
+    
+    private static OnlineChargingSystem inventoryBasedReservationScheme(double totalDataAllowance) {
+    	// hyper-parameters
+		System.out.print("Enter default GU(MB) for inventory-based reservation scheme");
+		defaultGU = input.nextDouble();
+		System.out.println("");
+		
+//		System.out.print("Enter the signals of each report");
+//		double signalsPerReport = input.nextDouble();
+//		System.out.println("");
+		
+		double signalsPerReport = 2;
+		
+//		System.out.print("Enter the signals of each order");
+//		double signalsPerOrder = input.nextDouble();
+//		System.out.println("");
+		
+		double signalsPerOrder = 6;
+		
+		// configure online charging function for IRS
+		OnlineChargingFunctionInventoryBasedReservationScheme OCF = new OnlineChargingFunctionInventoryBasedReservationScheme(defaultGU, signalsPerReport, signalsPerOrder);
+		// configure account balance management function
+		AccountBalanceManagementFunction ABMF = new AccountBalanceManagementFunction(totalDataAllowance);
+    	
+    	
+		return new OnlineChargingSystem(OCF, ABMF);
+	}
     
 }
