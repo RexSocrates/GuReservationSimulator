@@ -146,8 +146,25 @@ public class OnlineChargingSystem {
         return hashtable;
     }
     
-    // receiving the current status of user equipment
-    public void receiveCurrentStatus(Hashtable hashtable) {
+    // receiving the current status of user equipments, the report includes UE ID, remaining GU and average data rate
+    public void receiveCurrentStatusReport(Hashtable hashtable) {
+    	// update the optimal GU when receiving the current status report of each user equipment
     	
+    	// get information from the current status report
+    	int ueID = 0;
+    	double avgDataRate = 0;
+    	double remainingGU = 0;
+    	
+    	if(hashtable.containsKey("ueID")) {
+    		ueID = (int)hashtable.get("ueID");
+    	}
+    	
+    	if(hashtable.containsKey("avgDataRate")) {
+    		avgDataRate = (double)hashtable.get("avgDataRate");
+    	}
+    	
+    	if(hashtable.containsKey("remainingGU")) {
+    		remainingGU = (double)hashtable.get("remainingGU");
+    	}
     }
 }

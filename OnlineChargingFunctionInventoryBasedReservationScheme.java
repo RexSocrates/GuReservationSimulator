@@ -17,20 +17,30 @@ public class OnlineChargingFunctionInventoryBasedReservationScheme implements Re
 	// the fixed number of signals of each order
 	double S;
 	
+	// declare a hash table to record the optimal GUs for each user equipment
+	Hashtable<Integer, Double> optimalGUs;
+	
 	public OnlineChargingFunctionInventoryBasedReservationScheme(double defaultGu, double signalsPerReport, double signalsPerOrder) {
 		this.R = signalsPerReport;
 		this.S = signalsPerOrder;
 		this.defaultGU = defaultGu;
+		
+		// initialize the optimal GUs hash table, the key is UE ID and the value is the average data usage of each UE
+		this.optimalGUs = new Hashtable<Integer, Double>();
 	}
 	
 	// compute the optimal size of granted unit for each user equipment
-	public double getOptimalGU(double totalDemand, double periodicalDataUsage) {
-		return Math.sqrt(totalDemand * this.S * periodicalDataUsage / this.R);
+	public double getOptimalGU(double totalDemandPerMonth, double periodicalDataUsage) {
+		return Math.sqrt(totalDemandPerMonth * this.S * periodicalDataUsage / this.R);
+	}
+	
+	// update optimal GU for each user equipment
+	public void updateOptimalGUs(int ueID, double totalDemandPerMonth) {
+		
 	}
 
 	@Override
 	public double determineGU(Hashtable hashtable) {
-		// TODO Auto-generated method stub
 		return this.defaultGU;
 	}
 

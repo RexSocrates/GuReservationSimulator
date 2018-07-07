@@ -124,11 +124,14 @@ public class GuReservationSimulator {
     	
 		for(int i = 0; i < numOfDevices; i++) {
 			if(option == 1 || option == 2) {
-				// fixed scheme or multiplicative scheme
-				UeArr.add(new UserEquipment(i, OCS));
+				// fixed scheme
+				UeArr.add(new UserEquipment(i, OCS, "FS"));
+			}else if(option == 2) {
+				// multiplicative scheme
+				UeArr.add(new UserEquipment(i, OCS, "MS"));
 			}else if(option == 3) {
 				// Inventory-based reservation scheme
-				UeArr.add(new UserEquipment(i, OCS, chargingPeriods, dataCollectionPeriods, cycleTime));
+				UeArr.add(new UserEquipment(i, OCS, chargingPeriods, dataCollectionPeriods, cycleTime, "IRS"));
 			}
 		}
 	}
@@ -246,7 +249,7 @@ public class GuReservationSimulator {
 //		double signalsPerReport = input.nextDouble();
 //		System.out.println("");
 		
-		double signalsPerReport = 2;
+		double signalsPerReport = 1;
 		
 //		System.out.print("Enter the signals of each order");
 //		double signalsPerOrder = input.nextDouble();

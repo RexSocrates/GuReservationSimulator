@@ -17,6 +17,7 @@ public class UserEquipment {
     private OnlineChargingSystem OCS;
     private double currentGU;
     private double producedSignals = 0;
+    private double currentTimePeriod = 0;
     
     // store a single period of allocated GUs
     ArrayList<Double> allocatedGUs;
@@ -24,12 +25,15 @@ public class UserEquipment {
     // store multiple periods' allocated GUs
     ArrayList<SinglePeriodAllocatedGUs> periodAllocatedRecords;
     
+    // represent the reservation with acronym
+    String reservationScheme = "";
+    
     // IRS variables
     // total demand per month, Unit : MB 
     double totalDemand;
     // periodical data usage
     double periodicalDataUsage;
-    // charging periods, unit : day
+    // charging periods, unit : hour
     double chargingPeriods;
     // data collection time, unit : hour
     double dataCollectionPeriod;
@@ -37,21 +41,23 @@ public class UserEquipment {
     double cycleTime;
     
     // constructor for FS or MS
-    public UserEquipment(int ID, OnlineChargingSystem OCS) {
+    public UserEquipment(int ID, OnlineChargingSystem OCS, String reservationScheme) {
         this.ueID = ID;
         this.OCS = OCS;
         this.currentGU = 0;
         this.allocatedGUs = new ArrayList<Double>();
         this.periodAllocatedRecords = new ArrayList<SinglePeriodAllocatedGUs>();
+        this.reservationScheme = reservationScheme;
     }
     
     // constructor for IRS
-    public UserEquipment(int ID, OnlineChargingSystem OCS, double chargingPeriods, double dataCollectionPeriod, double cycleTime) {
+    public UserEquipment(int ID, OnlineChargingSystem OCS, double chargingPeriods, double dataCollectionPeriod, double cycleTime, String reservationScheme) {
     	this.ueID = ID;
     	this.OCS = OCS;
     	this.currentGU = 0;
     	this.allocatedGUs = new ArrayList<Double>();
         this.periodAllocatedRecords = new ArrayList<SinglePeriodAllocatedGUs>();
+        this.reservationScheme = reservationScheme;
     	
     	// change days to hours
     	this.chargingPeriods = chargingPeriods * 24;
@@ -77,16 +83,30 @@ public class UserEquipment {
     
     // compute IRS variables
     // compute periodical data usage
-    public double computePeriodicalDataUsage(double totalDemand, double periods) {
+    public double computePeriodicalDataUsage() {
     	// formula : current total data usage / current time periods
     	
-    	return totalDemand / periods;
+    	// get current total GU consumption
+    	double totalGuConsumption = 0;
+    	// compute previous periods' data usage
+    	for(int i = 0; i < this.periodAllocatedRecords.size(); i++) {
+    		SinglePeriodAllocatedGUs record = this.periodAllocatedRecords.get(i);
+    		
+    		totalGuConsumption += record.getSumOfGUs();
+    	}
+    	
+    	// compute the GU consumption of current period
+    	for(int i = 0; i < this.allocatedGUs.size(); i++) {
+    		totalGuConsumption += this.allocatedGUs.get(i);
+    	}
+    	
+    	return totalGuConsumption / this.currentTimePeriod;
     }
     
     // compute total demand in a charging period
     public double computeTotalDemand() {
-    	// formula : current total data usage / current time periods * charging periods
-    	return 0.0;
+    	// formula : data usage (current total data usage / current time periods) * charging periods
+    	return this.computePeriodicalDataUsage() * this.chargingPeriods;
     }
     
     // Functions
@@ -95,10 +115,15 @@ public class UserEquipment {
     public Hashtable reportCurrentStatus() {
     	Hashtable<String, Double> hashtable = new Hashtable<String, Double>();
     	
-    	// how to define average data rate ?
-    	double avgDataRate = Math.random() * 10;
-    	hashtable.put("avgDataRate", avgDataRate);
-    	hashtable.put("remaining", this.currentGU);
+    	// add the content of current status report
+    	hashtable.put("ueID", (double)this.ueID);
+    	hashtable.put("avgDataRate", this.computePeriodicalDataUsage());
+    	hashtable.put("remainingGU", this.currentGU);
+    	
+    	// add the number of signals used by one report
+    	this.producedSignals += 1;
+    	
+    	this.OCS.receiveCurrentStatusReport(hashtable);
     	
     	return hashtable;
     }
@@ -109,8 +134,12 @@ public class UserEquipment {
         this.consumeGU(sessionTotalGU);
         this.sendOnlineChargingRequestSessionEnd();
         
+        
         // add those allocated GUs into a single record
         this.periodAllocatedRecords.add(new SinglePeriodAllocatedGUs(timePeriod, this.allocatedGUs));
+        
+        // initialize the allocated GUs after the record of previous period is stored
+        this.allocatedGUs = new ArrayList<Double>();
         
         // report current status to OCS after report interval
         if(timePeriod % this.cycleTime == 0) {
