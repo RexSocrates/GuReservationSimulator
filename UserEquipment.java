@@ -13,6 +13,7 @@ import java.util.Hashtable;
  */
 public class UserEquipment {
 	// Basic variables
+	// consider the UE ID is its IMEI
     private int ueID;
     private OnlineChargingSystem OCS;
     private double currentGU;
@@ -27,6 +28,8 @@ public class UserEquipment {
     
     // represent the reservation with acronym
     String reservationScheme = "";
+    // if the reservation need each UE to report their current status, then this variable is true, otherwise it's false
+    boolean reportUeStatus;
     
     // IRS variables
     // total demand per month, Unit : MB 
@@ -37,8 +40,8 @@ public class UserEquipment {
     double chargingPeriods;
     // data collection time, unit : hour
     double dataCollectionPeriod;
-    // cycle time, report interval
-    double cycleTime;
+    // report interval
+    double reportInterval;
     
     // constructor for FS or MS
     public UserEquipment(int ID, OnlineChargingSystem OCS, String reservationScheme) {
@@ -48,23 +51,26 @@ public class UserEquipment {
         this.allocatedGUs = new ArrayList<Double>();
         this.periodAllocatedRecords = new ArrayList<SinglePeriodAllocatedGUs>();
         this.reservationScheme = reservationScheme;
+        this.reportUeStatus = false;
     }
     
     // constructor for IRS
-    public UserEquipment(int ID, OnlineChargingSystem OCS, double chargingPeriods, double dataCollectionPeriod, double cycleTime, String reservationScheme) {
+    public UserEquipment(int ID, OnlineChargingSystem OCS, double chargingPeriods, double dataCollectionPeriod, double reportInterval, String reservationScheme) {
     	this.ueID = ID;
     	this.OCS = OCS;
     	this.currentGU = 0;
     	this.allocatedGUs = new ArrayList<Double>();
         this.periodAllocatedRecords = new ArrayList<SinglePeriodAllocatedGUs>();
         this.reservationScheme = reservationScheme;
+        this.reportUeStatus = true;
     	
     	// change days to hours
     	this.chargingPeriods = chargingPeriods * 24;
     	this.dataCollectionPeriod = dataCollectionPeriod;
-    	this.cycleTime = cycleTime;
+    	this.reportInterval = reportInterval;
     }
 
+    // getter and setter
     public double getCurrentGU() {
         return currentGU;
     }
@@ -82,10 +88,22 @@ public class UserEquipment {
     }
     
     // compute IRS variables
-    // compute periodical data usage
+    // compute periodical data usage rate
     public double computePeriodicalDataUsage() {
     	// formula : current total data usage / current time periods
     	
+    	double totalGuConsumption = this.computeTotalGuConsumption();
+    	
+    	// subtract the GU that haven't been used
+    	if(totalGuConsumption - this.currentGU >= 0) {
+    		totalGuConsumption = totalGuConsumption - this.currentGU;
+    	}
+    	
+    	return totalGuConsumption / this.currentTimePeriod;
+    }
+    
+    // compute total GU consumption
+    public double computeTotalGuConsumption() {
     	// get current total GU consumption
     	double totalGuConsumption = 0;
     	// compute previous periods' data usage
@@ -100,10 +118,10 @@ public class UserEquipment {
     		totalGuConsumption += this.allocatedGUs.get(i);
     	}
     	
-    	return totalGuConsumption / this.currentTimePeriod;
+    	return totalGuConsumption;
     }
     
-    // compute total demand in a charging period
+    // compute estimated total demand in a charging period
     public double computeTotalDemand() {
     	// formula : data usage (current total data usage / current time periods) * charging periods
     	return this.computePeriodicalDataUsage() * this.chargingPeriods;
@@ -121,6 +139,7 @@ public class UserEquipment {
     	hashtable.put("remainingGU", this.currentGU);
     	
     	// add the number of signals used by one report
+    	System.out.printf("Report current status, UE ID : %d\n", this.ueID);
     	this.producedSignals += 1;
     	
     	this.OCS.receiveCurrentStatusReport(hashtable);
@@ -128,8 +147,27 @@ public class UserEquipment {
     	return hashtable;
     }
     
-    // a completed session, giving a granted unit that a session needs
+    // prepare the data for IRS to calculate the optimal size of GU
+    public Hashtable prepareForOptimalGU() {
+    	Hashtable<String, Double> hashtable = new Hashtable<String, Double>();
+    	
+    	// UE ID
+    	hashtable.put("UEID", (double)this.ueID);
+    	// D : total demand
+    	hashtable.put("totalDemand", this.computeTotalDemand());
+    	// W : the data size of periodical data usage 
+    	hashtable.put("periodicalDataUsage", this.computePeriodicalDataUsage());
+    	
+    	return hashtable;
+    }
+    
+    // to complete a session, giving a granted unit that a session needs and the time that the session created
     public void completeSession(double sessionTotalGU, double timePeriod) {
+    	// report current status to OCS after report interval
+        if(this.reportUeStatus && timePeriod % this.reportInterval == 0) {
+        	reportCurrentStatus();
+        }
+        
         this.sendOnlineChargingRequestSessionStart();
         this.consumeGU(sessionTotalGU);
         this.sendOnlineChargingRequestSessionEnd();
@@ -140,11 +178,6 @@ public class UserEquipment {
         
         // initialize the allocated GUs after the record of previous period is stored
         this.allocatedGUs = new ArrayList<Double>();
-        
-        // report current status to OCS after report interval
-        if(timePeriod % this.cycleTime == 0) {
-        	reportCurrentStatus();
-        }
     }
     
     
@@ -153,7 +186,7 @@ public class UserEquipment {
         System.out.println("sendOnlineChargingRequestSessionStart");
         
         // call next function, the parameter is a signals counter, it will return the number of signals
-        Hashtable hashtable = this.OCS.receiveOnlineChargingRequestSessionStart(1);
+        Hashtable hashtable = this.OCS.receiveOnlineChargingRequestSessionStart(this.ueID, 1);
         
         // keys : numOfSignals, balance, reservedGU
         double numOfSignals = (double)hashtable.get("numOfSignals");
@@ -171,7 +204,6 @@ public class UserEquipment {
     
     // consuming granted unit
     public void consumeGU(double consumedGU) {
-//        Hashtable<String, Double> hashtable = new Hashtable<String, Double>();
         
         if(this.getCurrentGU() > consumedGU) {
             // current GU is positive and enough for this activity
@@ -197,7 +229,7 @@ public class UserEquipment {
     	System.out.println("sendOnlineChargingRequestSessionContinue");
         
         // send the online charging request, so the initial number of signals is 1
-        Hashtable<String, Double> hashtable = this.OCS.receiveOnlineChargingRequestSessionContinue(1, reservationCount);
+        Hashtable<String, Double> hashtable = this.OCS.receiveOnlineChargingRequestSessionContinue(this.ueID, 1, reservationCount);
         
         double reservedGU = (double) hashtable.get("reservedGU");
         
@@ -209,8 +241,6 @@ public class UserEquipment {
         
         // add the number of signals to the variable produced signals
         this.setProducedSignals(this.getProducedSignals() + numOfSignals);
-        
-//        return hashtable;
     }
     
     // session end
@@ -218,7 +248,7 @@ public class UserEquipment {
     	System.out.println("sendOnlineChargingRequestSessionEnd");
     	
         // send the online charging request, so the initial number of signals is 1
-        Hashtable<String, Double> hashtable = this.OCS.receiveOnlineChargingRequestSessionEnd(1);
+        Hashtable<String, Double> hashtable = this.OCS.receiveOnlineChargingRequestSessionEnd(this.ueID, 1);
         
         // add number of signals
         double numOfSignals = hashtable.get("numOfSignals");

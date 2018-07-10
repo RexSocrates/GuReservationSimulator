@@ -19,6 +19,7 @@ public class GuReservationSimulator {
     static ArrayList<UserEquipment> UeArr = new ArrayList<UserEquipment>();
     static OnlineChargingSystem OCS;
     static double defaultGU = 0;
+    static double chargingPeriods = 0;
 
     /**
      * @param args the command line arguments
@@ -105,20 +106,16 @@ public class GuReservationSimulator {
     
     private static void initializeUserEquipments(int numOfDevices, int option) {
     	double dataCollectionPeriods = 0;
-    	double cycleTime = 0;
-    	double chargingPeriods = 0;
+    	double reportInterval = 0;
+//    	chargingPeriods = 0;
     	if(option == 3) {
     		// enter some variable that IRS needs
     		System.out.print("Enter data collection periods(hour) : ");
         	dataCollectionPeriods = input.nextDouble();
         	System.out.println("");
         	
-        	System.out.print("Enter cycle time(report interval, hour) : ");
-        	cycleTime = input.nextDouble();
-        	System.out.println("");
-        	
-        	System.out.print("Enter the charging period(days) : ");
-        	chargingPeriods = input.nextDouble();
+        	System.out.print("Enter report interval(hour) : ");
+        	reportInterval = input.nextDouble();
         	System.out.println("");
     	}
     	
@@ -131,7 +128,7 @@ public class GuReservationSimulator {
 				UeArr.add(new UserEquipment(i, OCS, "MS"));
 			}else if(option == 3) {
 				// Inventory-based reservation scheme
-				UeArr.add(new UserEquipment(i, OCS, chargingPeriods, dataCollectionPeriods, cycleTime, "IRS"));
+				UeArr.add(new UserEquipment(i, OCS, chargingPeriods, dataCollectionPeriods, reportInterval, "IRS"));
 			}
 		}
 	}
@@ -241,6 +238,10 @@ public class GuReservationSimulator {
     
     private static OnlineChargingSystem inventoryBasedReservationScheme(double totalDataAllowance) {
     	// hyper-parameters
+    	System.out.print("Enter the charging period(days) : ");
+    	chargingPeriods = input.nextDouble();
+    	System.out.println("");
+    	
 		System.out.print("Enter default GU(MB) for inventory-based reservation scheme");
 		defaultGU = input.nextDouble();
 		System.out.println("");
@@ -258,7 +259,7 @@ public class GuReservationSimulator {
 		double signalsPerOrder = 6;
 		
 		// configure online charging function for IRS
-		OnlineChargingFunctionInventoryBasedReservationScheme OCF = new OnlineChargingFunctionInventoryBasedReservationScheme(defaultGU, signalsPerReport, signalsPerOrder);
+		OnlineChargingFunctionInventoryBasedReservationScheme OCF = new OnlineChargingFunctionInventoryBasedReservationScheme(defaultGU, chargingPeriods, signalsPerReport, signalsPerOrder);
 		// configure account balance management function
 		AccountBalanceManagementFunction ABMF = new AccountBalanceManagementFunction(totalDataAllowance);
     	

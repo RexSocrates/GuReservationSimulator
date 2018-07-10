@@ -78,7 +78,7 @@ public class OnlineChargingSystem {
     // Account control operations
     
     // receive online charging request, session start, check balance
-    public Hashtable receiveOnlineChargingRequestSessionStart(double numOfSignals) {
+    public Hashtable receiveOnlineChargingRequestSessionStart(int ueID, double numOfSignals) {
         // Debit unit request, signals + 1
         numOfSignals += 1;
         System.out.println("Send Debit unit request");
@@ -107,7 +107,7 @@ public class OnlineChargingSystem {
     }
     
     // receive online charging request, session continue
-    public Hashtable receiveOnlineChargingRequestSessionContinue(double numOfSignals, double reservationCount) {
+    public Hashtable receiveOnlineChargingRequestSessionContinue(int ueID, double numOfSignals, double reservationCount) {
         Hashtable<String, Double> hashtable = new Hashtable<String, Double>();
         
         hashtable.put("numOfSignals", numOfSignals);
@@ -126,7 +126,7 @@ public class OnlineChargingSystem {
     }
     
     // receive online charging request, session end
-    public Hashtable receiveOnlineChargingRequestSessionEnd(double numOfSignals) {
+    public Hashtable receiveOnlineChargingRequestSessionEnd(int ueID, double numOfSignals) {
         Hashtable<String, Double> hashtable = new Hashtable<String, Double>();
         
         // Debit unit request, signals + 1
@@ -155,16 +155,14 @@ public class OnlineChargingSystem {
     	double avgDataRate = 0;
     	double remainingGU = 0;
     	
-    	if(hashtable.containsKey("ueID")) {
+    	if(hashtable.containsKey("ueID") && hashtable.containsKey("avgDataRate") && hashtable.containsKey("remainingGU")) {
     		ueID = (int)hashtable.get("ueID");
-    	}
-    	
-    	if(hashtable.containsKey("avgDataRate")) {
     		avgDataRate = (double)hashtable.get("avgDataRate");
-    	}
-    	
-    	if(hashtable.containsKey("remainingGU")) {
     		remainingGU = (double)hashtable.get("remainingGU");
     	}
+    	
+    	// record these data in online charging function
+    	
+    	
     }
 }

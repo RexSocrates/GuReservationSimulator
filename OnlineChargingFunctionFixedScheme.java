@@ -11,11 +11,10 @@ import java.util.Hashtable;
  *
  * @author Socrates
  */
-public class OnlineChargingFunctionFixedScheme implements ReservationScheme {
-    private double defaultGU;
+public class OnlineChargingFunctionFixedScheme extends OnlineChargingFunctionReservationScheme {
     
     public OnlineChargingFunctionFixedScheme(double defaultGu) {
-        this.defaultGU = defaultGu;
+    	super(defaultGu, "FS");
     }
 
     @Override

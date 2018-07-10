@@ -11,12 +11,11 @@ import java.util.Hashtable;
  *
  * @author Socrates
  */
-public class OnlineChargingFunctionMultiplicativeScheme implements ReservationScheme {
-    private double defaultGU;
+public class OnlineChargingFunctionMultiplicativeScheme extends OnlineChargingFunctionReservationScheme {
     private double c = 1;
     
     public OnlineChargingFunctionMultiplicativeScheme(double defaultGU, double c) {
-        this.defaultGU = defaultGU;
+        super(defaultGU, "MS");
         this.c = c;
     }
 
