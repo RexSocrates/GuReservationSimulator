@@ -1,26 +1,38 @@
 import java.util.Hashtable;
+import java.util.Set;
 
 public class OnlineChargingFunctionInventoryBasedReservationScheme extends OnlineChargingFunctionReservationScheme {
 	// Variables of Q model for regular IoT devices
-	
-	// total demand per month D list ?
-//	double D;
-	// the granted unit that SBCF always reserves Q list ?
-//	double Q;
-	// the data size of periodical data usage W list ?
-//	double W;
 	
 	// the fixed number of signals per periodical report needs
 	double R;
 	// the fixed number of signals of each order
 	double S;
+	// charging periods
+	double chargingPeriods;
 	
 	
 	// UE status report variables
-	// declare a hash table to record the average data usage for each user equipment
-	Hashtable<Integer, Double> avgDataUsages;
-	// charging periods
-	double chargingPeriods;
+	// total demand per month D 
+	Hashtable estimatedTotalDemandHashtable;
+	// declare a hash table to store the average data usage for each user equipment W
+	Hashtable dataUsageHashtable;
+	// the granted unit that SBCF always reserves Q 
+	Hashtable optimalGUsHashtable;
+	
+	// remaining GU in each device
+	Hashtable remainingGUsHashtable;
+	
+	// EGU variables
+	// latest reporting time
+	Hashtable reportingTime;
+	// valid time or cycle time
+	
+	// a hash table to store EGUs
+	Hashtable EGUsHashtable;
+	
+	
+	
 	
 	public OnlineChargingFunctionInventoryBasedReservationScheme(double defaultGu, double chargingPeriods, double signalsPerReport, double signalsPerOrder) {
 		super(defaultGu, "IRS");
@@ -29,25 +41,172 @@ public class OnlineChargingFunctionInventoryBasedReservationScheme extends Onlin
 		this.chargingPeriods = chargingPeriods;
 		this.defaultGU = defaultGu;
 		
-		// initialize the optimal GUs hash table, the key is UE ID and the value is the average data usage of each UE
-		this.avgDataUsages = new Hashtable<Integer, Double>();
+		// initialize the hash table, the key is UE ID
+		// estimated total demand = data usage * charging period
+		this.estimatedTotalDemandHashtable = new Hashtable<Integer, Double>();
+		// data usage
+		this.dataUsageHashtable = new Hashtable<Integer, Double>();
+		// optimal size of GU
+		this.optimalGUsHashtable = new Hashtable<Integer, Double>();
+		// remaining GU
+		this.remainingGUsHashtable = new Hashtable<Integer, Double>();
+		// latest reporting time
+		this.reportingTime = new Hashtable<Integer, Double>();
+		// EGU
+		this.EGUsHashtable = new Hashtable<Integer, Double>();
 	}
 	
 	// compute the optimal size of granted unit for each user equipment
-	public double getOptimalGU(double totalDemandPerMonth, double periodicalDataUsage) {
-		return Math.sqrt(totalDemandPerMonth * this.S * periodicalDataUsage / this.R);
+	public double getOptimalGU(double estiTotalDemand, double periodicalDataUsage) {
+		return Math.sqrt(estiTotalDemand * this.S * periodicalDataUsage / this.R);
 	}
 	
 	// update optimal GU(Q) for each user equipment
-	public void receiveStatusReport(int ueID, double totalDemandPerMonth) {
-		// update the list of average data usage
+	public void receiveStatusReport(int ueID, double avgDataUsage, double remainingGU) {
+		// update the list of average data usage and estimated total demand
+		
+		double totalDemand = 0;
+		double optimalGU = this.defaultGU;
+		
+		if(avgDataUsage > 0) {
+			// calculate estimated total demand
+			totalDemand = avgDataUsage * this.chargingPeriods;
+			// get optimal size of GU
+			optimalGU = this.getOptimalGU(totalDemand, avgDataUsage);
+		}
+		
+		
+		// store estimated total demand
+		this.estimatedTotalDemandHashtable.put(ueID, totalDemand);
+		// store average data usage
+		this.dataUsageHashtable.put(ueID, avgDataUsage);
+		// store remaining GU
+		this.remainingGUsHashtable.put(ueID, remainingGU);
+		// store optimal GU
+		this.optimalGUsHashtable.put(ueID, optimalGU);
+		
+	}
+	
+	// compute valid time
+	public double computeValidTime(int ueID) {
+		// formula : D(estimated total demand) / Q (optimal size of GU)
+		double totalDemand = 0;
+		double optimalGU = this.defaultGU;
+		
+		if(this.estimatedTotalDemandHashtable.containsKey(ueID) && this.optimalGUsHashtable.containsKey(ueID)) {
+			totalDemand = (double)this.estimatedTotalDemandHashtable.get(ueID);
+			optimalGU = (double)this.optimalGUsHashtable.get(ueID);
+		}
+		
+		double validTime = totalDemand / optimalGU;
+		
+		return validTime;
+	}
+	
+	// get latest reporting time
+	public double getLatestReportingTimt(int ueID) {
+		// return 0 if there is no record of latest reporting time
+		double latestReportingTime = 0;
+		if(this.reportingTime.containsKey(ueID)) {
+			latestReportingTime = (double)this.reportingTime.get(ueID);
+		}
+		
+		return latestReportingTime;
+	}
+	
+	// compute the expected GU for UE to complete its cycle
+	public double getCompleteCycleExpectedGU(int ueID) {
+		// formula : (valid time or cycle time - latest reporting time) * average data rate
+		double validTime = this.computeValidTime(ueID);
+		double latestReportingTime = this.getLatestReportingTimt(ueID);
+		double avgDataRate = 0;
+		
+		// check if the average data rate is in the hash table
+		if(this.dataUsageHashtable.containsKey(ueID)) {
+			avgDataRate = (double)this.dataUsageHashtable.get(ueID);
+		}
+		
+		return (validTime - latestReportingTime) * avgDataRate;
 	}
 	
 	// calculating EGU
+	public double getEgu(int ueID) {
+		// formula : getCompleteCycleExpectedGU() - remaining GU -> if the result is positive
+		double egu = 0;
+		double remainingGU = 0;
+		
+		// check if the data is in the hash table
+		if(this.remainingGUsHashtable.containsKey(ueID)) {
+			remainingGU = (double)this.remainingGUsHashtable.get(ueID);
+		}
+		
+		if(this.getCompleteCycleExpectedGU(ueID) - remainingGU >= 0) {
+			egu = this.getCompleteCycleExpectedGU(ueID) - remainingGU;
+		}else {
+			egu = 0;
+		}
+		// put the value in hash table
+		this.EGUsHashtable.put(ueID, egu);
+		
+		return egu;
+	}
+	
+	// get sum of EGU
+	public double getSumOfEGUs() {
+		double sumOfEGUs = 0;
+		
+		// get the IDs in hash table
+		int[] ueIDs = this.getKeys();
+		
+		for(int i = 0; i < ueIDs.length; i++) {
+			int ueID = ueIDs[i];
+			sumOfEGUs += this.getEgu(ueID);
+		}
+		
+		return sumOfEGUs;
+	}
+	
+	// get all the keys in the hash table, to calculate the sum of EGU
+	public int[] getKeys() {
+		// get the set of the keys in hash table
+		Object[] keys = this.reportingTime.keySet().toArray();
+		
+		// declare an array to store those keys
+		int[] IDs = new int[keys.length];
+		
+		// change type to integer
+		for(int i = 0; i < keys.length; i++) {
+			IDs[i] = (int)keys[i];
+		}
+		
+		return IDs;
+	}
+	
+	// get GU for the device when the remaining data allowance is not enough
+	public double getInsufficientGuFor(int ueID, double remainingDataAllowance) {
+		double sumOfEGUs = this.getSumOfEGUs();
+		
+		// the EGU of the device whose UE ID is ueID
+		double ueIdEGU = (double)this.EGUsHashtable.get(ueID);
+		
+		double insufficientGU = ueIdEGU / sumOfEGUs * remainingDataAllowance;
+		
+		return insufficientGU;
+	}
+
 
 	@Override
 	public double determineGU(Hashtable hashtable) {
-		return this.defaultGU;
+		int ueID = ((Double)hashtable.get("UEID")).intValue();
+		
+		// if the UE ID was stored in the hash table, then return the optimal size of GU, otherwise return  default GU
+		double reservedGU = this.defaultGU;
+		if(this.optimalGUsHashtable.containsKey(ueID)) {
+			System.out.println("UE ID is in the hash table");
+			reservedGU = (double)this.optimalGUsHashtable.get(ueID);
+		}
+		
+		return reservedGU;
 	}
 
 }

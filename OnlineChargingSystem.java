@@ -41,19 +41,18 @@ public class OnlineChargingSystem {
     // reserve GU
     public double reserveGrantedUnit(Hashtable hashtable) {
         // the hashtable should at least containa number of signals
-        
-        // determine GU
-        double reservedGU = this.determineGU(hashtable);
-        
-        double numOfSignals = (double)hashtable.get("numOfSignals");
+    	double numOfSignals = (double)hashtable.get("numOfSignals");
         
         // Debit unit request, signals + 1
         numOfSignals += 1;
-        System.out.println("Send Debit unit request");
+//        System.out.println("Send Debit unit request");
+    	
+        // determine GU
+        double reservedGU = this.determineGU(hashtable);
         
         // Debit unit response, signals + 1
         numOfSignals += 1;
-        System.out.println("Send Debit unit response");
+//        System.out.println("Send Debit unit response");
         
         // update the number of signals
         hashtable.put("numOfSignals", numOfSignals);
@@ -68,6 +67,8 @@ public class OnlineChargingSystem {
         }else {
             // remaining data allowance is not enough
             System.out.println("Remaining data allowance is not enough, but the function hasn't been completed yet");
+            
+            // set a flag to tell the device that the remaining data allowance is not enough
         }
         
         // send online charging response to tell the UE how much granted unit it can use
@@ -81,15 +82,16 @@ public class OnlineChargingSystem {
     public Hashtable receiveOnlineChargingRequestSessionStart(int ueID, double numOfSignals) {
         // Debit unit request, signals + 1
         numOfSignals += 1;
-        System.out.println("Send Debit unit request");
+//        System.out.println("Send Debit unit request");
         
         // Debit unit response, signals + 1
         numOfSignals += 1;
-        System.out.println("Send Debit unit response");
+//        System.out.println("Send Debit unit response");
         
         
         // prepare the hashtable to return the value
         Hashtable<String, Double> hashtable = new Hashtable<String, Double>();
+        hashtable.put("UEID", (double)ueID);
         hashtable.put("numOfSignals", numOfSignals);
         hashtable.put("balance", this.ABMF.getRemainingDataAllowance());
         
@@ -109,7 +111,7 @@ public class OnlineChargingSystem {
     // receive online charging request, session continue
     public Hashtable receiveOnlineChargingRequestSessionContinue(int ueID, double numOfSignals, double reservationCount) {
         Hashtable<String, Double> hashtable = new Hashtable<String, Double>();
-        
+        hashtable.put("UEID", (double)ueID);
         hashtable.put("numOfSignals", numOfSignals);
         hashtable.put("reservationCount", reservationCount);
         
@@ -128,18 +130,19 @@ public class OnlineChargingSystem {
     // receive online charging request, session end
     public Hashtable receiveOnlineChargingRequestSessionEnd(int ueID, double numOfSignals) {
         Hashtable<String, Double> hashtable = new Hashtable<String, Double>();
+        hashtable.put("UEID", (double)ueID);
         
         // Debit unit request, signals + 1
         numOfSignals += 1;
-        System.out.println("Send Debit unit request");
+//        System.out.println("Send Debit unit request");
         
         // Debit unit response, signals + 1
         numOfSignals += 1;
-        System.out.println("Send Debit unit response");
+//        System.out.println("Send Debit unit response");
         
         // online charging response, signals + 1
         numOfSignals += 1;
-        System.out.println("Send Online charging response");
+//        System.out.println("Send Online charging response");
         
         hashtable.put("numOfSignals", numOfSignals);
         
@@ -156,12 +159,13 @@ public class OnlineChargingSystem {
     	double remainingGU = 0;
     	
     	if(hashtable.containsKey("ueID") && hashtable.containsKey("avgDataRate") && hashtable.containsKey("remainingGU")) {
-    		ueID = (int)hashtable.get("ueID");
+    		ueID = ((Double)hashtable.get("ueID")).intValue();
     		avgDataRate = (double)hashtable.get("avgDataRate");
     		remainingGU = (double)hashtable.get("remainingGU");
     	}
     	
     	// record these data in online charging function
+    	// cast the OCF to OCF IRS
     	
     	
     }

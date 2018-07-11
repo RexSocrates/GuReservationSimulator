@@ -147,20 +147,6 @@ public class UserEquipment {
     	return hashtable;
     }
     
-    // prepare the data for IRS to calculate the optimal size of GU
-    public Hashtable prepareForOptimalGU() {
-    	Hashtable<String, Double> hashtable = new Hashtable<String, Double>();
-    	
-    	// UE ID
-    	hashtable.put("UEID", (double)this.ueID);
-    	// D : total demand
-    	hashtable.put("totalDemand", this.computeTotalDemand());
-    	// W : the data size of periodical data usage 
-    	hashtable.put("periodicalDataUsage", this.computePeriodicalDataUsage());
-    	
-    	return hashtable;
-    }
-    
     // to complete a session, giving a granted unit that a session needs and the time that the session created
     public void completeSession(double sessionTotalGU, double timePeriod) {
     	// report current status to OCS after report interval
@@ -183,7 +169,7 @@ public class UserEquipment {
     
     // session start, requesting GU
     public void sendOnlineChargingRequestSessionStart() {
-        System.out.println("sendOnlineChargingRequestSessionStart");
+//        System.out.println("sendOnlineChargingRequestSessionStart");
         
         // call next function, the parameter is a signals counter, it will return the number of signals
         Hashtable hashtable = this.OCS.receiveOnlineChargingRequestSessionStart(this.ueID, 1);
@@ -226,7 +212,7 @@ public class UserEquipment {
     
     // session continue, requesting GU
     public void sendOnlineChargingRequestSessionContinue(double reservationCount) {
-    	System.out.println("sendOnlineChargingRequestSessionContinue");
+//    	System.out.println("sendOnlineChargingRequestSessionContinue");
         
         // send the online charging request, so the initial number of signals is 1
         Hashtable<String, Double> hashtable = this.OCS.receiveOnlineChargingRequestSessionContinue(this.ueID, 1, reservationCount);
@@ -245,7 +231,7 @@ public class UserEquipment {
     
     // session end
     public void sendOnlineChargingRequestSessionEnd() {
-    	System.out.println("sendOnlineChargingRequestSessionEnd");
+//    	System.out.println("sendOnlineChargingRequestSessionEnd");
     	
         // send the online charging request, so the initial number of signals is 1
         Hashtable<String, Double> hashtable = this.OCS.receiveOnlineChargingRequestSessionEnd(this.ueID, 1);
@@ -254,8 +240,4 @@ public class UserEquipment {
         double numOfSignals = hashtable.get("numOfSignals");
         this.setProducedSignals(this.getProducedSignals() + numOfSignals);
     }
-    
-    
-    
-    
 }

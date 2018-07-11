@@ -73,7 +73,7 @@ public class GuReservationSimulator {
         int deviceCount = 0;
         // stimulate that time is moving
         double timePeriod = 0;
-        while(OCS.getRemainingDataAllowance() >= defaultGU) {
+        while(OCS.getRemainingDataAllowance() >= 0) {
             double randomConsumedGU = Math.random() * randomRange * defaultGU;
             System.out.printf("Random GU : %5.2f\n", randomConsumedGU);
             
@@ -242,7 +242,7 @@ public class GuReservationSimulator {
     	chargingPeriods = input.nextDouble();
     	System.out.println("");
     	
-		System.out.print("Enter default GU(MB) for inventory-based reservation scheme");
+		System.out.print("Enter default GU(MB) for inventory-based reservation scheme : ");
 		defaultGU = input.nextDouble();
 		System.out.println("");
 		
