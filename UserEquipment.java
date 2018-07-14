@@ -16,9 +16,14 @@ public class UserEquipment {
 	// consider the UE ID is its IMEI
     private int ueID;
     private OnlineChargingSystem OCS;
+    // store the remaining GU in the device
     private double currentGU;
+    // record the number of signals that the device produce
     private double producedSignals = 0;
+    // record the current time
     private double currentTimePeriod = 0;
+    // record the times that session fails
+    private int sessionFailedTimes = 0;
     
     // store a single period of allocated GUs
     ArrayList<Double> allocatedGUs;
@@ -85,6 +90,14 @@ public class UserEquipment {
 
     public void setProducedSignals(double producedSignals) {
         this.producedSignals = producedSignals;
+    }
+    
+    public int getSessionFailedTimes() {
+    	return this.sessionFailedTimes;
+    }
+    
+    public void setSessionFailedTimes(int sessionFailedTimes) {
+    	this.sessionFailedTimes = sessionFailedTimes;
     }
     
     // compute IRS variables

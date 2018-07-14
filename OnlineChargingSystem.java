@@ -64,11 +64,15 @@ public class OnlineChargingSystem {
             this.ABMF.setRemainingDataAllowance(remainingBalance - reservedGU);
             System.out.printf("Reserved GU : %5.0f\n", reservedGU);
             System.out.printf("Remaining data allowance : %10.2f\n", this.ABMF.getRemainingDataAllowance());
+            
+            // set a flag to tell the device that the remaining data allowance is enough, represented by 0
+            hashtable.put("dataAllowanceNotEnough", 0);
         }else {
             // remaining data allowance is not enough
             System.out.println("Remaining data allowance is not enough, but the function hasn't been completed yet");
             
-            // set a flag to tell the device that the remaining data allowance is not enough
+            // set a flag to tell the device that the remaining data allowance is not enough, represented by 1
+            hashtable.put("dataAllowanceNotEnough", 1);
         }
         
         // send online charging response to tell the UE how much granted unit it can use
