@@ -73,7 +73,7 @@ public class GuReservationSimulator {
         int deviceCount = 0;
         // stimulate that time is moving
         double timePeriod = 0;
-        while(OCS.getRemainingDataAllowance() >= 0) {
+        while(OCS.getRemainingDataAllowance() > 0) {
             double randomConsumedGU = Math.random() * randomRange * defaultGU;
             System.out.printf("Random GU : %5.2f\n", randomConsumedGU);
             
@@ -191,6 +191,8 @@ public class GuReservationSimulator {
 			double signals = device.getProducedSignals();
 			totalSignals += signals;
 			System.out.printf("Signals : %3.0f\n", signals);
+			System.out.printf("Session successful rate : %5.0f", device.getSuccessfulRate() * 100);
+			System.out.println("%");
 		}
 		System.out.printf("Total signals : %5.0f\n", totalSignals);
 		
@@ -210,7 +212,7 @@ public class GuReservationSimulator {
         AccountBalanceManagementFunction ABMF = new AccountBalanceManagementFunction(totalDataAllowance);
         
         // create an instance for online charging system
-        OnlineChargingSystem OCS = new OnlineChargingSystem(OCF, ABMF);
+        OnlineChargingSystem OCS = new OnlineChargingSystem(OCF, ABMF, "FS");
         
         return OCS;
     }
@@ -230,7 +232,7 @@ public class GuReservationSimulator {
         // configure account balance management function
         AccountBalanceManagementFunction ABMF = new AccountBalanceManagementFunction(totalDataAllowance);
         
-        OnlineChargingSystem OCS = new OnlineChargingSystem(OCF, ABMF);
+        OnlineChargingSystem OCS = new OnlineChargingSystem(OCF, ABMF, "MS");
         
         return OCS;
         
@@ -264,7 +266,7 @@ public class GuReservationSimulator {
 		AccountBalanceManagementFunction ABMF = new AccountBalanceManagementFunction(totalDataAllowance);
     	
     	
-		return new OnlineChargingSystem(OCF, ABMF);
+		return new OnlineChargingSystem(OCF, ABMF, "IRS");
 	}
     
 }

@@ -12,15 +12,17 @@ import java.util.Hashtable;
  * @author Socrates
  */
 public class OnlineChargingSystem {
-    private ReservationScheme OCF;
+    private OnlineChargingFunctionReservationScheme OCF;
     private AccountBalanceManagementFunction ABMF;
+    String reservationSchemeName = "";
     
-    public OnlineChargingSystem(ReservationScheme OCF, AccountBalanceManagementFunction ABMF) {
+    public OnlineChargingSystem(OnlineChargingFunctionReservationScheme OCF, AccountBalanceManagementFunction ABMF, String reservationSchemeName) {
         this.OCF = OCF;
         this.ABMF = ABMF;
+        this.reservationSchemeName = reservationSchemeName;
     }
 
-    public ReservationScheme getOCF() {
+    public OnlineChargingFunctionReservationScheme getOCF() {
         return OCF;
     }
 
@@ -64,15 +66,26 @@ public class OnlineChargingSystem {
             this.ABMF.setRemainingDataAllowance(remainingBalance - reservedGU);
             System.out.printf("Reserved GU : %5.0f\n", reservedGU);
             System.out.printf("Remaining data allowance : %10.2f\n", this.ABMF.getRemainingDataAllowance());
-            
-            // set a flag to tell the device that the remaining data allowance is enough, represented by 0
-            hashtable.put("dataAllowanceNotEnough", 0);
         }else {
             // remaining data allowance is not enough
-            System.out.println("Remaining data allowance is not enough, but the function hasn't been completed yet");
+//            System.out.println("Remaining data allowance is not enough, but the function hasn't been completed yet");
             
             // set a flag to tell the device that the remaining data allowance is not enough, represented by 1
             hashtable.put("dataAllowanceNotEnough", 1);
+            
+            // call the function to determine GU when the remaining data allowance is not enough
+            if(this.reservationSchemeName.equals("IRS")) {
+            	int ueID = (int)hashtable.get("UEID");
+                double remainingDataAllowance = this.getRemainingDataAllowance();
+                OnlineChargingFunctionInventoryBasedReservationScheme irsOCF = (OnlineChargingFunctionInventoryBasedReservationScheme)this.getOCF();
+                reservedGU = irsOCF.getSurplusGu(ueID, remainingDataAllowance);
+            }else {
+            	double remainingDataAllowance = this.getRemainingDataAllowance();
+            	reservedGU = this.getOCF().getSurplusGu(remainingDataAllowance);
+            	
+            	// subtract the reserved GU 
+            	this.ABMF.setRemainingDataAllowance(remainingBalance - reservedGU);
+            }
         }
         
         // send online charging response to tell the UE how much granted unit it can use

@@ -15,4 +15,8 @@ public class OnlineChargingFunctionReservationScheme implements ReservationSchem
 		return this.defaultGU;
 	}
 	
+	public double getSurplusGu(double remainingDataAllowance) {
+		return remainingDataAllowance;
+	}
+	
 }

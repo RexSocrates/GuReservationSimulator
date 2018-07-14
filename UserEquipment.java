@@ -22,6 +22,8 @@ public class UserEquipment {
     private double producedSignals = 0;
     // record the current time
     private double currentTimePeriod = 0;
+    // count the sessions include completed and failed sessions
+    private double numberOfSessions = 0;
     // record the times that session fails
     private int sessionFailedTimes = 0;
     
@@ -100,6 +102,11 @@ public class UserEquipment {
     	this.sessionFailedTimes = sessionFailedTimes;
     }
     
+    public double getSuccessfulRate() {
+    	double successfulTimes = this.numberOfSessions - this.sessionFailedTimes;
+    	return successfulTimes / this.numberOfSessions;
+    }
+    
     // compute IRS variables
     // compute periodical data usage rate
     public double computePeriodicalDataUsage() {
@@ -167,9 +174,18 @@ public class UserEquipment {
         	reportCurrentStatus();
         }
         
-        this.sendOnlineChargingRequestSessionStart();
-        this.consumeGU(sessionTotalGU);
-        this.sendOnlineChargingRequestSessionEnd();
+        boolean dataAllowanceNotEnough = this.sendOnlineChargingRequestSessionStart();
+        
+        if(dataAllowanceNotEnough) {
+        	// the remaining data allowance is not enough, session ends
+        	this.sendOnlineChargingRequestSessionEnd();
+        }
+        else {
+        	// the remaining data allowance is enough, session continues
+        	this.consumeGU(sessionTotalGU);
+            this.sendOnlineChargingRequestSessionEnd();
+        }
+        
         
         
         // add those allocated GUs into a single record
@@ -181,11 +197,21 @@ public class UserEquipment {
     
     
     // session start, requesting GU
-    public void sendOnlineChargingRequestSessionStart() {
+    public boolean sendOnlineChargingRequestSessionStart() {
+    	// session counter += 1
+        this.numberOfSessions += 1;
+    	
 //        System.out.println("sendOnlineChargingRequestSessionStart");
         
         // call next function, the parameter is a signals counter, it will return the number of signals
         Hashtable hashtable = this.OCS.receiveOnlineChargingRequestSessionStart(this.ueID, 1);
+        
+        boolean dataAllowanceNotEnough = false;
+        if(hashtable.containsKey("dataAllowanceNotEnough")) {
+        	// if the key is contained in the hash table, then the remaining data allowance is not enough
+        	dataAllowanceNotEnough = true;
+        	this.sessionFailedTimes += 1;
+        }
         
         // keys : numOfSignals, balance, reservedGU
         double numOfSignals = (double)hashtable.get("numOfSignals");
@@ -199,6 +225,8 @@ public class UserEquipment {
         this.setCurrentGU(this.getCurrentGU() + allocatedGU);
         // add the allocated GU to the list
         this.allocatedGUs.add(allocatedGU);
+        
+        return dataAllowanceNotEnough;
     }
     
     // consuming granted unit
@@ -213,22 +241,41 @@ public class UserEquipment {
         	System.out.printf("Not Enough Current device remaining GU : %5.1f\n", this.getCurrentGU());
         	
             int reservationCount = 0;
+            boolean dataAllowanceNotEnough = false;
             do {
                 // to continue session
-                sendOnlineChargingRequestSessionContinue(reservationCount++);
+                dataAllowanceNotEnough = sendOnlineChargingRequestSessionContinue(reservationCount++);
+                
+                if(dataAllowanceNotEnough) {
+                	// if the remaining data allowance is not enough, then break the loop
+                	break;
+                }
             }while(this.getCurrentGU() < consumedGU);
             
-            // consume GU
-            this.setCurrentGU(this.getCurrentGU() - consumedGU);
+            if(dataAllowanceNotEnough) {
+            	// if the remaining data allowance is not enough, then the session is failed
+            	this.sessionFailedTimes += 1;
+            }else {
+            	// if the remaining data  allowance is enough, then we can consume GU
+            	this.setCurrentGU(this.getCurrentGU() - consumedGU);
+            }
         }
     }
     
     // session continue, requesting GU
-    public void sendOnlineChargingRequestSessionContinue(double reservationCount) {
+    public boolean sendOnlineChargingRequestSessionContinue(double reservationCount) {
 //    	System.out.println("sendOnlineChargingRequestSessionContinue");
         
         // send the online charging request, so the initial number of signals is 1
         Hashtable<String, Double> hashtable = this.OCS.receiveOnlineChargingRequestSessionContinue(this.ueID, 1, reservationCount);
+        
+        boolean dataAllowanceNotEnough = false;
+        if(hashtable.containsKey("dataAllowanceNotEnough")) {
+        	// the remaining data allowance is not enough
+        	dataAllowanceNotEnough = true;
+        }else {
+        	
+        }
         
         double reservedGU = (double) hashtable.get("reservedGU");
         
@@ -240,6 +287,8 @@ public class UserEquipment {
         
         // add the number of signals to the variable produced signals
         this.setProducedSignals(this.getProducedSignals() + numOfSignals);
+        
+        return dataAllowanceNotEnough;
     }
     
     // session end

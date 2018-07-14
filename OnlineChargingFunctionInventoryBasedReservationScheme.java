@@ -183,7 +183,7 @@ public class OnlineChargingFunctionInventoryBasedReservationScheme extends Onlin
 	}
 	
 	// get GU for the device when the remaining data allowance is not enough
-	public double getInsufficientGuFor(int ueID, double remainingDataAllowance) {
+	public double getSurplusGu(int ueID, double remainingDataAllowance) {
 		double sumOfEGUs = this.getSumOfEGUs();
 		
 		// the EGU of the device whose UE ID is ueID
