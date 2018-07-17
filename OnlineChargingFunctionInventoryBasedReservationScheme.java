@@ -62,7 +62,7 @@ public class OnlineChargingFunctionInventoryBasedReservationScheme extends Onlin
 	}
 	
 	// update optimal GU(Q) for each user equipment
-	public void receiveStatusReport(int ueID, double avgDataUsage, double remainingGU) {
+	public void receiveStatusReport(int ueID, double avgDataUsage, double remainingGU, double currentTimePeriod) {
 		// update the list of average data usage and estimated total demand
 		
 		double totalDemand = 0;
@@ -75,15 +75,25 @@ public class OnlineChargingFunctionInventoryBasedReservationScheme extends Onlin
 			optimalGU = this.getOptimalGU(totalDemand, avgDataUsage);
 		}
 		
+//		System.out.printf("UE ID : %d\n", ueID);
+//		System.out.printf("Total demand : %f\n", totalDemand);
+//		System.out.printf("Periodical data usage : %f\n", avgDataUsage);
+//		System.out.printf("Remaining GU : %f\n", remainingGU);
+//		System.out.printf("Optimal GU : %f\n", optimalGU);
+		
 		
 		// store estimated total demand
 		this.estimatedTotalDemandHashtable.put(ueID, totalDemand);
 		// store average data usage
 		this.dataUsageHashtable.put(ueID, avgDataUsage);
+		System.out.println("Put Periodical data usage : " + avgDataUsage);
 		// store remaining GU
 		this.remainingGUsHashtable.put(ueID, remainingGU);
+		System.out.println("Put Remaining GU : " + remainingGU);
 		// store optimal GU
 		this.optimalGUsHashtable.put(ueID, optimalGU);
+		// update latest reporting time
+		this.reportingTime.put(ueID, currentTimePeriod);
 		
 	}
 	
@@ -104,7 +114,7 @@ public class OnlineChargingFunctionInventoryBasedReservationScheme extends Onlin
 	}
 	
 	// get latest reporting time
-	public double getLatestReportingTimt(int ueID) {
+	public double getLatestReportingTime(int ueID) {
 		// return 0 if there is no record of latest reporting time
 		double latestReportingTime = 0;
 		if(this.reportingTime.containsKey(ueID)) {
@@ -118,7 +128,7 @@ public class OnlineChargingFunctionInventoryBasedReservationScheme extends Onlin
 	public double getCompleteCycleExpectedGU(int ueID) {
 		// formula : (valid time or cycle time - latest reporting time) * average data rate
 		double validTime = this.computeValidTime(ueID);
-		double latestReportingTime = this.getLatestReportingTimt(ueID);
+		double latestReportingTime = this.getLatestReportingTime(ueID);
 		double avgDataRate = 0;
 		
 		// check if the average data rate is in the hash table
@@ -137,14 +147,25 @@ public class OnlineChargingFunctionInventoryBasedReservationScheme extends Onlin
 		
 		// check if the data is in the hash table
 		if(this.remainingGUsHashtable.containsKey(ueID)) {
+//			System.out.print("Enter if ");
 			remainingGU = (double)this.remainingGUsHashtable.get(ueID);
+//			System.out.printf("UE ID : %d\n", ueID);
+//			System.out.println("Remaining GU : " + this.remainingGUsHashtable.get(ueID));
 		}
+		
 		
 		if(this.getCompleteCycleExpectedGU(ueID) - remainingGU >= 0) {
 			egu = this.getCompleteCycleExpectedGU(ueID) - remainingGU;
 		}else {
 			egu = 0;
 		}
+		
+//		System.out.println("UE ID : " + ueID);
+//		System.out.println("Remaining GU hash table length : " + this.remainingGUsHashtable.keySet().toArray().length);
+//		System.out.println("Remaining GU : " + remainingGU);
+//		System.out.println("EGU : " + egu);
+//		System.out.println("==============================================");
+		
 		// put the value in hash table
 		this.EGUsHashtable.put(ueID, egu);
 		
@@ -190,6 +211,11 @@ public class OnlineChargingFunctionInventoryBasedReservationScheme extends Onlin
 		double ueIdEGU = (double)this.EGUsHashtable.get(ueID);
 		
 		double insufficientGU = ueIdEGU / sumOfEGUs * remainingDataAllowance;
+		
+		System.out.println("Remaining data allowance : " + remainingDataAllowance);
+		System.out.println("UE ID GU " + ueIdEGU);
+		System.out.println("Sum of EGU " + sumOfEGUs);
+		System.out.println("insufficient EGU : " + insufficientGU);
 		
 		return insufficientGU;
 	}

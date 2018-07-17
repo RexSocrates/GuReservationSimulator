@@ -20,6 +20,7 @@ public class GuReservationSimulator {
     static OnlineChargingSystem OCS;
     static double defaultGU = 0;
     static double chargingPeriods = 0;
+    static double reportInterval = 1;
 
     /**
      * @param args the command line arguments
@@ -72,8 +73,14 @@ public class GuReservationSimulator {
         // a variable to change device index
         int deviceCount = 0;
         // stimulate that time is moving
-        double timePeriod = 0;
+        double timePeriod = 1;
+//        int loopCount = 0;
         while(OCS.getRemainingDataAllowance() > 0) {
+        	// report current status once every report interval
+        	if(timePeriod % reportInterval == 0) {
+        		reportCurrentStatus();
+        	}
+        	
             double randomConsumedGU = Math.random() * randomRange * defaultGU;
             System.out.printf("Random GU : %5.2f\n", randomConsumedGU);
             
@@ -86,6 +93,10 @@ public class GuReservationSimulator {
             if(Math.random() * 10 >= 5) {
             	System.out.println("Time counter : " + timePeriod++);
             }
+            
+//            if(++loopCount > 1000) {
+//            	break;
+//            }
             
             System.out.printf("Remaining data allowance : %10.2f\n", OCS.getRemainingDataAllowance());
         }
@@ -106,7 +117,7 @@ public class GuReservationSimulator {
     
     private static void initializeUserEquipments(int numOfDevices, int option) {
     	double dataCollectionPeriods = 0;
-    	double reportInterval = 0;
+    	reportInterval = 0;
 //    	chargingPeriods = 0;
     	if(option == 3) {
     		// enter some variable that IRS needs
@@ -179,6 +190,14 @@ public class GuReservationSimulator {
 		
 		inputFile.close();
 		
+	}
+	
+	// Devices report current status
+	private static void reportCurrentStatus(){
+		for(int i = 0; i < UeArr.size(); i++) {
+			UserEquipment ue = UeArr.get(i);
+			ue.reportCurrentStatus();
+		}
 	}
 	
 	// Count functions

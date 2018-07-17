@@ -21,7 +21,7 @@ public class UserEquipment {
     // record the number of signals that the device produce
     private double producedSignals = 0;
     // record the current time
-    private double currentTimePeriod = 0;
+    private double currentTimePeriod = 1;
     // count the sessions include completed and failed sessions
     private double numberOfSessions = 0;
     // record the times that session fails
@@ -59,17 +59,19 @@ public class UserEquipment {
         this.periodAllocatedRecords = new ArrayList<SinglePeriodAllocatedGUs>();
         this.reservationScheme = reservationScheme;
         this.reportUeStatus = false;
+        this.currentTimePeriod = 1;
     }
     
     // constructor for IRS
     public UserEquipment(int ID, OnlineChargingSystem OCS, double chargingPeriods, double dataCollectionPeriod, double reportInterval, String reservationScheme) {
     	this.ueID = ID;
-    	this.OCS = OCS;
-    	this.currentGU = 0;
-    	this.allocatedGUs = new ArrayList<Double>();
+        this.OCS = OCS;
+        this.currentGU = 0;
+        this.allocatedGUs = new ArrayList<Double>();
         this.periodAllocatedRecords = new ArrayList<SinglePeriodAllocatedGUs>();
         this.reservationScheme = reservationScheme;
         this.reportUeStatus = true;
+        this.currentTimePeriod = 1;
     	
     	// change days to hours
     	this.chargingPeriods = chargingPeriods * 24;
@@ -79,7 +81,7 @@ public class UserEquipment {
 
     // getter and setter
     public double getCurrentGU() {
-        return currentGU;
+        return this.currentGU;
     }
 
     public void setCurrentGU(double currentGU) {
@@ -113,6 +115,9 @@ public class UserEquipment {
     	// formula : current total data usage / current time periods
     	
     	double totalGuConsumption = this.computeTotalGuConsumption();
+    	
+//    	System.out.printf("Total GU consumption : %f\n", totalGuConsumption);
+//    	System.out.printf("Current time period : %f\n", this.currentTimePeriod);
     	
     	// subtract the GU that haven't been used
     	if(totalGuConsumption - this.currentGU >= 0) {
@@ -153,10 +158,23 @@ public class UserEquipment {
     public Hashtable reportCurrentStatus() {
     	Hashtable<String, Double> hashtable = new Hashtable<String, Double>();
     	
+    	double periodicalDataUsage = this.computePeriodicalDataUsage();
+    	
+//    	System.out.printf("UE ID : %d\n", this.ueID);
+//    	System.out.printf("Periodical data usage : %f\n", periodicalDataUsage);
+//    	System.out.printf("Remaining GU : %f\n", this.currentGU);
+    	
     	// add the content of current status report
     	hashtable.put("ueID", (double)this.ueID);
-    	hashtable.put("avgDataRate", this.computePeriodicalDataUsage());
+    	hashtable.put("avgDataRate", periodicalDataUsage);
     	hashtable.put("remainingGU", this.currentGU);
+    	
+//    	System.out.println("Periodical data usage : " + periodicalDataUsage);
+//    	System.out.println("Remaining GU : " + this.getCurrentGU());
+//    	System.out.println("==============================");
+    	
+    	// add the time period to tell the OCS that the current time
+    	hashtable.put("timePeriod", this.currentTimePeriod);
     	
     	// add the number of signals used by one report
     	System.out.printf("Report current status, UE ID : %d\n", this.ueID);
@@ -169,10 +187,11 @@ public class UserEquipment {
     
     // to complete a session, giving a granted unit that a session needs and the time that the session created
     public void completeSession(double sessionTotalGU, double timePeriod) {
-    	// report current status to OCS after report interval
-        if(this.reportUeStatus && timePeriod % this.reportInterval == 0) {
-        	reportCurrentStatus();
-        }
+    	System.out.println("UE ID : " + this.ueID);
+    	System.out.println("Current GU : " + this.getCurrentGU());
+    	System.out.println("=====================================");
+    	
+    	this.currentTimePeriod = timePeriod;
         
         boolean dataAllowanceNotEnough = this.sendOnlineChargingRequestSessionStart();
         

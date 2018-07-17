@@ -75,7 +75,7 @@ public class OnlineChargingSystem {
             
             // call the function to determine GU when the remaining data allowance is not enough
             if(this.reservationSchemeName.equals("IRS")) {
-            	int ueID = (int)hashtable.get("UEID");
+            	int ueID = ((Double)hashtable.get("UEID")).intValue();
                 double remainingDataAllowance = this.getRemainingDataAllowance();
                 OnlineChargingFunctionInventoryBasedReservationScheme irsOCF = (OnlineChargingFunctionInventoryBasedReservationScheme)this.getOCF();
                 reservedGU = irsOCF.getSurplusGu(ueID, remainingDataAllowance);
@@ -86,6 +86,9 @@ public class OnlineChargingSystem {
             	// subtract the reserved GU 
             	this.ABMF.setRemainingDataAllowance(remainingBalance - reservedGU);
             }
+            
+            System.out.printf("Reserve surplus GU : %5.0f\n", reservedGU);
+            System.out.printf("Remaining data allowance : %10.2f\n", this.ABMF.getRemainingDataAllowance());
         }
         
         // send online charging response to tell the UE how much granted unit it can use
@@ -174,15 +177,28 @@ public class OnlineChargingSystem {
     	int ueID = 0;
     	double avgDataRate = 0;
     	double remainingGU = 0;
+    	double currentTimePeriod = 1;
     	
-    	if(hashtable.containsKey("ueID") && hashtable.containsKey("avgDataRate") && hashtable.containsKey("remainingGU")) {
+    	if(hashtable.containsKey("ueID") && hashtable.containsKey("avgDataRate") && hashtable.containsKey("remainingGU") && hashtable.containsKey("timePeriod")) {
     		ueID = ((Double)hashtable.get("ueID")).intValue();
     		avgDataRate = (double)hashtable.get("avgDataRate");
     		remainingGU = (double)hashtable.get("remainingGU");
+    		currentTimePeriod = (double)hashtable.get("timePeriod");
     	}
     	
+//    	System.out.println("UE ID : " + ueID);
+//    	System.out.println("Periodical data usage : " + avgDataRate);
+//    	System.out.println("Remaining GU : " + remainingGU);
+//    	System.out.println("Time period : " + currentTimePeriod);
+//    	System.out.println("=======================================");
+    	
     	// record these data in online charging function
-    	// cast the OCF to OCF IRS
+    	if(this.reservationSchemeName.equals("IRS")) {
+    		OnlineChargingFunctionInventoryBasedReservationScheme IRSOCF = (OnlineChargingFunctionInventoryBasedReservationScheme)this.getOCF();
+    		
+    		IRSOCF.receiveStatusReport(ueID, avgDataRate, remainingGU, currentTimePeriod);
+    	}
+    	
     	
     	
     }
