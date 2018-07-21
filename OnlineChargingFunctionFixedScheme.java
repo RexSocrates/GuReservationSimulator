@@ -13,8 +13,8 @@ import java.util.Hashtable;
  */
 public class OnlineChargingFunctionFixedScheme extends OnlineChargingFunctionReservationScheme {
     
-    public OnlineChargingFunctionFixedScheme(double defaultGu) {
-    	super(defaultGu, "FS");
+    public OnlineChargingFunctionFixedScheme(double defaultGu, double chargingPeriods) {
+    	super(defaultGu, chargingPeriods, "FS");
     }
 
     @Override

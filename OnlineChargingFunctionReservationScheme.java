@@ -2,10 +2,13 @@ import java.util.Hashtable;
 
 public class OnlineChargingFunctionReservationScheme implements ReservationScheme {
 	double defaultGU;
+	// charging period (hours)
+	double chargingPeriods = 1;
 	String reservationScheme;
 	
-	public OnlineChargingFunctionReservationScheme(double defaultGU, String reservationScheme) {
+	public OnlineChargingFunctionReservationScheme(double defaultGU, double chargingPeriods, String reservationScheme) {
 		this.defaultGU = defaultGU;
+		this.chargingPeriods = chargingPeriods * 24;
 		this.reservationScheme = reservationScheme;
 	}
 
@@ -17,6 +20,14 @@ public class OnlineChargingFunctionReservationScheme implements ReservationSchem
 	
 	public double getSurplusGu(double remainingDataAllowance) {
 		return remainingDataAllowance;
+	}
+	
+	public double getChargingPeriods() {
+		return this.chargingPeriods;
+	}
+	
+	public void setChargingPeriod(double chargingPeriods) {
+		this.chargingPeriods = chargingPeriods;
 	}
 	
 }

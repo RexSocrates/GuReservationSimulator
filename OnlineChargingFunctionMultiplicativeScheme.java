@@ -14,8 +14,8 @@ import java.util.Hashtable;
 public class OnlineChargingFunctionMultiplicativeScheme extends OnlineChargingFunctionReservationScheme {
     private double c = 1;
     
-    public OnlineChargingFunctionMultiplicativeScheme(double defaultGU, double c) {
-        super(defaultGU, "MS");
+    public OnlineChargingFunctionMultiplicativeScheme(double defaultGU, double c, double chargingPeriods) {
+        super(defaultGU, chargingPeriods, "MS");
         this.c = c;
     }
 

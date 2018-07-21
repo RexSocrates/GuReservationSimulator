@@ -19,7 +19,7 @@ public class GuReservationSimulator {
     static ArrayList<UserEquipment> UeArr = new ArrayList<UserEquipment>();
     static OnlineChargingSystem OCS;
     static double defaultGU = 0;
-    static double chargingPeriods = 0;
+    static double chargingPeriods = 1;
     static double reportInterval = 1;
 
     /**
@@ -70,17 +70,12 @@ public class GuReservationSimulator {
         System.out.print("Enter the random GU range ( > 0) : ");
         double randomRange = input.nextDouble();
         
-        // a variable to change device index
-        int deviceCount = 0;
+        
         // stimulate that time is moving
+        int deviceCount = 0;
         double timePeriod = 1;
 //        int loopCount = 0;
         while(OCS.getRemainingDataAllowance() > 0) {
-        	// report current status once every report interval
-        	if(timePeriod % reportInterval == 0) {
-        		reportCurrentStatus();
-        	}
-        	
             double randomConsumedGU = Math.random() * randomRange * defaultGU;
             System.out.printf("Random GU : %5.2f\n", randomConsumedGU);
             
@@ -94,11 +89,16 @@ public class GuReservationSimulator {
             	System.out.println("Time counter : " + timePeriod++);
             }
             
-//            if(++loopCount > 1000) {
-//            	break;
-//            }
+            // report current status once every report interval
+        	if(timePeriod % reportInterval == 0) {
+        		reportCurrentStatus(timePeriod);
+        	}
             
             System.out.printf("Remaining data allowance : %10.2f\n", OCS.getRemainingDataAllowance());
+            
+            if(timePeriod >= 50) {
+            	break;
+            }
         }
         
         
@@ -193,10 +193,10 @@ public class GuReservationSimulator {
 	}
 	
 	// Devices report current status
-	private static void reportCurrentStatus(){
+	private static void reportCurrentStatus(double currentTime){
 		for(int i = 0; i < UeArr.size(); i++) {
 			UserEquipment ue = UeArr.get(i);
-			ue.reportCurrentStatus();
+			ue.reportCurrentStatus(currentTime);
 		}
 	}
 	
@@ -225,8 +225,10 @@ public class GuReservationSimulator {
         defaultGU = input.nextDouble();
         System.out.println("");
         
+        
+        
         // configure online charging function for fixed scheme
-        OnlineChargingFunctionFixedScheme OCF = new OnlineChargingFunctionFixedScheme(defaultGU);
+        OnlineChargingFunctionFixedScheme OCF = new OnlineChargingFunctionFixedScheme(defaultGU, chargingPeriods);
         // configure account balance management function
         AccountBalanceManagementFunction ABMF = new AccountBalanceManagementFunction(totalDataAllowance);
         
@@ -247,7 +249,7 @@ public class GuReservationSimulator {
         System.out.println("");
         
         // configure online charging function for multiplicative scheme
-        OnlineChargingFunctionMultiplicativeScheme OCF = new OnlineChargingFunctionMultiplicativeScheme(defaultGU, c);
+        OnlineChargingFunctionMultiplicativeScheme OCF = new OnlineChargingFunctionMultiplicativeScheme(defaultGU, c, chargingPeriods);
         // configure account balance management function
         AccountBalanceManagementFunction ABMF = new AccountBalanceManagementFunction(totalDataAllowance);
         
@@ -259,9 +261,9 @@ public class GuReservationSimulator {
     
     private static OnlineChargingSystem inventoryBasedReservationScheme(double totalDataAllowance) {
     	// hyper-parameters
-    	System.out.print("Enter the charging period(days) : ");
-    	chargingPeriods = input.nextDouble();
-    	System.out.println("");
+//    	System.out.print("Enter the charging period(days) : ");
+//    	chargingPeriods = input.nextDouble();
+//    	System.out.println("");
     	
 		System.out.print("Enter default GU(MB) for inventory-based reservation scheme : ");
 		defaultGU = input.nextDouble();

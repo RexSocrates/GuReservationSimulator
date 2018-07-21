@@ -38,6 +38,10 @@ public class OnlineChargingSystem {
         return this.ABMF.getRemainingDataAllowance();
     }
     
+//    public double getChargingPeriod() {
+//    	
+//    }
+    
     // Functions
     
     // reserve GU
@@ -185,12 +189,6 @@ public class OnlineChargingSystem {
     		remainingGU = (double)hashtable.get("remainingGU");
     		currentTimePeriod = (double)hashtable.get("timePeriod");
     	}
-    	
-//    	System.out.println("UE ID : " + ueID);
-//    	System.out.println("Periodical data usage : " + avgDataRate);
-//    	System.out.println("Remaining GU : " + remainingGU);
-//    	System.out.println("Time period : " + currentTimePeriod);
-//    	System.out.println("=======================================");
     	
     	// record these data in online charging function
     	if(this.reservationSchemeName.equals("IRS")) {

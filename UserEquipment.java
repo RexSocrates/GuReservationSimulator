@@ -17,7 +17,7 @@ public class UserEquipment {
     private int ueID;
     private OnlineChargingSystem OCS;
     // store the remaining GU in the device
-    private double currentGU;
+    private double currentGU = 0.0;
     // record the number of signals that the device produce
     private double producedSignals = 0;
     // record the current time
@@ -111,20 +111,20 @@ public class UserEquipment {
     
     // compute IRS variables
     // compute periodical data usage rate
-    public double computePeriodicalDataUsage() {
+    public double computePeriodicalDataUsage(double currentTime) {
     	// formula : current total data usage / current time periods
     	
     	double totalGuConsumption = this.computeTotalGuConsumption();
     	
 //    	System.out.printf("Total GU consumption : %f\n", totalGuConsumption);
-//    	System.out.printf("Current time period : %f\n", this.currentTimePeriod);
+//    	System.out.printf("Current time period : %f\n", currentTime);
     	
     	// subtract the GU that haven't been used
     	if(totalGuConsumption - this.currentGU >= 0) {
     		totalGuConsumption = totalGuConsumption - this.currentGU;
     	}
     	
-    	return totalGuConsumption / this.currentTimePeriod;
+    	return totalGuConsumption / currentTime;
     }
     
     // compute total GU consumption
@@ -143,22 +143,24 @@ public class UserEquipment {
     		totalGuConsumption += this.allocatedGUs.get(i);
     	}
     	
+    	System.out.println("Total GU consumption : " + totalGuConsumption);
+    	
     	return totalGuConsumption;
     }
     
     // compute estimated total demand in a charging period
-    public double computeTotalDemand() {
-    	// formula : data usage (current total data usage / current time periods) * charging periods
-    	return this.computePeriodicalDataUsage() * this.chargingPeriods;
-    }
+//    public double computeTotalDemand() {
+//    	// formula : data usage (current total data usage / current time periods) * charging periods
+//    	return this.computePeriodicalDataUsage() * this.chargingPeriods;
+//    }
     
     // Functions
     
     // return current status, including remaining GU of UE and the average data rate
-    public Hashtable reportCurrentStatus() {
+    public Hashtable reportCurrentStatus(double currentTime) {
     	Hashtable<String, Double> hashtable = new Hashtable<String, Double>();
     	
-    	double periodicalDataUsage = this.computePeriodicalDataUsage();
+    	double periodicalDataUsage = this.computePeriodicalDataUsage(currentTime);
     	
 //    	System.out.printf("UE ID : %d\n", this.ueID);
 //    	System.out.printf("Periodical data usage : %f\n", periodicalDataUsage);
@@ -174,7 +176,7 @@ public class UserEquipment {
 //    	System.out.println("==============================");
     	
     	// add the time period to tell the OCS that the current time
-    	hashtable.put("timePeriod", this.currentTimePeriod);
+    	hashtable.put("timePeriod", currentTime);
     	
     	// add the number of signals used by one report
     	System.out.printf("Report current status, UE ID : %d\n", this.ueID);
@@ -187,13 +189,23 @@ public class UserEquipment {
     
     // to complete a session, giving a granted unit that a session needs and the time that the session created
     public void completeSession(double sessionTotalGU, double timePeriod) {
-    	System.out.println("UE ID : " + this.ueID);
-    	System.out.println("Current GU : " + this.getCurrentGU());
-    	System.out.println("=====================================");
-    	
+    	// update the current time of the device
     	this.currentTimePeriod = timePeriod;
-        
-        boolean dataAllowanceNotEnough = this.sendOnlineChargingRequestSessionStart();
+    	
+    	// session service
+    	if(sessionTotalGU > this.getCurrentGU()) {
+    		// if the GU in this device is enough then consume the remaining GU
+    		this.setCurrentGU(this.getCurrentGU() - sessionTotalGU);
+//    		System.out.println("Consumed GU : " + sessionTotalGU);
+    	}else {
+    		// if it is not enough then ask for new GU from the OCS
+    		this.askNewGU(sessionTotalGU, timePeriod);
+    	}
+    }
+    
+    public void askNewGU(double sessionTotalGU, double timePeriod) {
+    	// send online charging request to ask new GU
+    	boolean dataAllowanceNotEnough = this.sendOnlineChargingRequestSessionStart();
         
         if(dataAllowanceNotEnough) {
         	// the remaining data allowance is not enough, session ends
@@ -244,6 +256,7 @@ public class UserEquipment {
         this.setCurrentGU(this.getCurrentGU() + allocatedGU);
         // add the allocated GU to the list
         this.allocatedGUs.add(allocatedGU);
+        System.out.printf("Session start, reserved GU : %f\n", allocatedGU);
         
         return dataAllowanceNotEnough;
     }
@@ -253,11 +266,13 @@ public class UserEquipment {
         
         if(this.getCurrentGU() > consumedGU) {
             // current GU is positive and enough for this activity
+        	System.out.printf("Enough Current device remaining GU : %5.1f\n", this.getCurrentGU());
+        	System.out.printf("Consumed GU : %f\n", consumedGU);
             this.setCurrentGU(this.getCurrentGU() - consumedGU);
-            System.out.printf("Enough Current device remaining GU : %5.1f\n", this.getCurrentGU());
         }else {
             // trigger online charging request to ask for new GU, since current GU is not enough
         	System.out.printf("Not Enough Current device remaining GU : %5.1f\n", this.getCurrentGU());
+        	System.out.printf("Consumed GU : %f\n", consumedGU);
         	
             int reservationCount = 0;
             boolean dataAllowanceNotEnough = false;
@@ -292,17 +307,16 @@ public class UserEquipment {
         if(hashtable.containsKey("dataAllowanceNotEnough")) {
         	// the remaining data allowance is not enough
         	dataAllowanceNotEnough = true;
-        }else {
-        	
         }
         
         double reservedGU = (double) hashtable.get("reservedGU");
+        System.out.printf("Session continue, reserved GU : %f\n", reservedGU);
         
         this.setCurrentGU(this.getCurrentGU() + reservedGU);
         this.allocatedGUs.add(reservedGU);
         
         double numOfSignals = hashtable.get("numOfSignals");
-        System.out.printf("Number of signals : %3.0f\n", numOfSignals);
+//        System.out.printf("Number of signals : %3.0f\n", numOfSignals);
         
         // add the number of signals to the variable produced signals
         this.setProducedSignals(this.getProducedSignals() + numOfSignals);
