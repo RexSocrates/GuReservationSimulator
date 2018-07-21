@@ -260,6 +260,9 @@ public class GuReservationSimulator {
     }
     
     private static OnlineChargingSystem inventoryBasedReservationScheme(double totalDataAllowance) {
+    	// view the test data and record the total usage and periodical data usage
+    	
+    	
     	// hyper-parameters
 //    	System.out.print("Enter the charging period(days) : ");
 //    	chargingPeriods = input.nextDouble();

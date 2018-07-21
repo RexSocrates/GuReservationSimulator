@@ -193,7 +193,7 @@ public class UserEquipment {
     	this.currentTimePeriod = timePeriod;
     	
     	// session service
-    	if(sessionTotalGU > this.getCurrentGU()) {
+    	if(sessionTotalGU <= this.getCurrentGU()) {
     		// if the GU in this device is enough then consume the remaining GU
     		this.setCurrentGU(this.getCurrentGU() - sessionTotalGU);
 //    		System.out.println("Consumed GU : " + sessionTotalGU);
