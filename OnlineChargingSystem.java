@@ -38,10 +38,6 @@ public class OnlineChargingSystem {
         return this.ABMF.getRemainingDataAllowance();
     }
     
-//    public double getChargingPeriod() {
-//    	
-//    }
-    
     // Functions
     
     // reserve GU
@@ -69,10 +65,9 @@ public class OnlineChargingSystem {
             // remaining data allowance is enough
             this.ABMF.setRemainingDataAllowance(remainingBalance - reservedGU);
             System.out.printf("Reserved GU : %5.0f\n", reservedGU);
-            System.out.printf("Remaining data allowance : %10.2f\n", this.ABMF.getRemainingDataAllowance());
+//            System.out.printf("Remaining data allowance : %10.2f\n", this.ABMF.getRemainingDataAllowance());
         }else {
             // remaining data allowance is not enough
-//            System.out.println("Remaining data allowance is not enough, but the function hasn't been completed yet");
             
             // set a flag to tell the device that the remaining data allowance is not enough, represented by 1
             hashtable.put("dataAllowanceNotEnough", 1);
@@ -92,7 +87,7 @@ public class OnlineChargingSystem {
             }
             
             System.out.printf("Reserve surplus GU : %5.0f\n", reservedGU);
-            System.out.printf("Remaining data allowance : %10.2f\n", this.ABMF.getRemainingDataAllowance());
+//            System.out.printf("Remaining data allowance : %10.2f\n", this.ABMF.getRemainingDataAllowance());
         }
         
         // send online charging response to tell the UE how much granted unit it can use
@@ -127,7 +122,6 @@ public class OnlineChargingSystem {
         numOfSignals = (double)hashtable.get("numOfSignals") + 1;
         hashtable.put("numOfSignals", numOfSignals);
         System.out.printf("Num of signals : %5.0f\n", numOfSignals);
-        
         
         return hashtable;
     }

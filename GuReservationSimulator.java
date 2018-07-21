@@ -96,9 +96,9 @@ public class GuReservationSimulator {
             
             System.out.printf("Remaining data allowance : %10.2f\n", OCS.getRemainingDataAllowance());
             
-            if(timePeriod >= 50) {
-            	break;
-            }
+//            if(timePeriod >= 50) {
+//            	break;
+//            }
         }
         
         

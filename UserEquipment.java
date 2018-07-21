@@ -179,7 +179,7 @@ public class UserEquipment {
     	hashtable.put("timePeriod", currentTime);
     	
     	// add the number of signals used by one report
-    	System.out.printf("Report current status, UE ID : %d\n", this.ueID);
+//    	System.out.printf("Report current status, UE ID : %d\n", this.ueID);
     	this.producedSignals += 1;
     	
     	this.OCS.receiveCurrentStatusReport(hashtable);
@@ -208,11 +208,11 @@ public class UserEquipment {
     	boolean dataAllowanceNotEnough = this.sendOnlineChargingRequestSessionStart();
         
         if(dataAllowanceNotEnough) {
-        	// the remaining data allowance is not enough, session ends
+        	// when the remaining data allowance is not enough, session ends
         	this.sendOnlineChargingRequestSessionEnd();
         }
         else {
-        	// the remaining data allowance is enough, session continues
+        	// when the remaining data allowance is enough, session continues
         	this.consumeGU(sessionTotalGU);
             this.sendOnlineChargingRequestSessionEnd();
         }
@@ -256,14 +256,35 @@ public class UserEquipment {
         this.setCurrentGU(this.getCurrentGU() + allocatedGU);
         // add the allocated GU to the list
         this.allocatedGUs.add(allocatedGU);
-        System.out.printf("Session start, reserved GU : %f\n", allocatedGU);
+//        System.out.printf("Session start, reserved GU : %f\n", allocatedGU);
         
         return dataAllowanceNotEnough;
     }
     
     // consuming granted unit
     public void consumeGU(double consumedGU) {
+    	
+    	boolean dataAllowanceNotEnough = false;
+    	int reservationCount = 1;
+    	while(this.getCurrentGU() < consumedGU) {
+    		// the remaining GU in the device is not enough so keep asking new GU until the allocated GU is enough
+    		
+    		dataAllowanceNotEnough = this.sendOnlineChargingRequestSessionContinue(reservationCount++);
+    		
+    		if(dataAllowanceNotEnough) {
+    			// if the remaining GU is not enough then break the loop
+    			break;
+    		}
+    	}
+    	
+    	if(dataAllowanceNotEnough) {
+    		this.sessionFailedTimes += 1;
+    	}else {
+    		// if the remaining GU is enough then consume GU
+    		this.setCurrentGU(this.getCurrentGU() - consumedGU);
+    	}
         
+    	/*
         if(this.getCurrentGU() > consumedGU) {
             // current GU is positive and enough for this activity
         	System.out.printf("Enough Current device remaining GU : %5.1f\n", this.getCurrentGU());
@@ -294,6 +315,7 @@ public class UserEquipment {
             	this.setCurrentGU(this.getCurrentGU() - consumedGU);
             }
         }
+        */
     }
     
     // session continue, requesting GU
@@ -310,7 +332,7 @@ public class UserEquipment {
         }
         
         double reservedGU = (double) hashtable.get("reservedGU");
-        System.out.printf("Session continue, reserved GU : %f\n", reservedGU);
+//        System.out.printf("Session continue, reserved GU : %f\n", reservedGU);
         
         this.setCurrentGU(this.getCurrentGU() + reservedGU);
         this.allocatedGUs.add(reservedGU);
