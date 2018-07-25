@@ -63,7 +63,7 @@ public class UserEquipment {
     }
     
     // constructor for IRS
-    public UserEquipment(int ID, OnlineChargingSystem OCS, double chargingPeriods, double dataCollectionPeriod, double reportInterval, String reservationScheme) {
+    public UserEquipment(int ID, OnlineChargingSystem OCS, double chargingPeriods, double dataCollectionPeriod, double reportInterval, double totalDemand, double periodicalDataUsage, String reservationScheme) {
     	this.ueID = ID;
         this.OCS = OCS;
         this.currentGU = 0;
@@ -73,6 +73,9 @@ public class UserEquipment {
         this.reportUeStatus = true;
         this.currentTimePeriod = 1;
     	
+        this.totalDemand = totalDemand;
+        this.periodicalDataUsage = periodicalDataUsage;
+        
     	// change days to hours
     	this.chargingPeriods = chargingPeriods * 24;
     	this.dataCollectionPeriod = dataCollectionPeriod;
@@ -102,6 +105,22 @@ public class UserEquipment {
     
     public void setSessionFailedTimes(int sessionFailedTimes) {
     	this.sessionFailedTimes = sessionFailedTimes;
+    }
+    
+    public double getTotalDemand() {
+    	return this.totalDemand;
+    }
+    
+    public void setTotalDemand(double totalDemand) {
+    	this.totalDemand = totalDemand;
+    }
+    
+    public double getPeriodicalDataUsage() {
+    	return this.periodicalDataUsage;
+    }
+    
+    public void setPeriodicalDataUsage(double periodicalDataUsage) {
+    	this.periodicalDataUsage = periodicalDataUsage;
     }
     
     public double getSuccessfulRate() {
@@ -160,15 +179,14 @@ public class UserEquipment {
     public Hashtable reportCurrentStatus(double currentTime) {
     	Hashtable<String, Double> hashtable = new Hashtable<String, Double>();
     	
-    	double periodicalDataUsage = this.computePeriodicalDataUsage(currentTime);
-    	
 //    	System.out.printf("UE ID : %d\n", this.ueID);
 //    	System.out.printf("Periodical data usage : %f\n", periodicalDataUsage);
 //    	System.out.printf("Remaining GU : %f\n", this.currentGU);
     	
     	// add the content of current status report
     	hashtable.put("ueID", (double)this.ueID);
-    	hashtable.put("avgDataRate", periodicalDataUsage);
+    	hashtable.put("avgDataRate", this.getPeriodicalDataUsage());
+    	hashtable.put("totalDemand", this.getTotalDemand());
     	hashtable.put("remainingGU", this.currentGU);
     	
 //    	System.out.println("Periodical data usage : " + periodicalDataUsage);

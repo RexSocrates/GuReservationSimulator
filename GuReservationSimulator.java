@@ -30,10 +30,10 @@ public class GuReservationSimulator {
         // TODO code application logic here
 //    	readFile();
     	
-        int numOfDevices = 0;
-        System.out.print("Enter the number of devices : ");
-        numOfDevices = input.nextInt();
-        System.out.println("");
+        int numOfDevices = 3;
+//        System.out.print("Enter the number of devices : ");
+//        numOfDevices = input.nextInt();
+//        System.out.println("");
         
         // print reservation scheme options
         String[] reservationSchemes = {
@@ -74,8 +74,9 @@ public class GuReservationSimulator {
         // stimulate that time is moving
         int deviceCount = 0;
         double timePeriod = 1;
+        reportCurrentStatus(timePeriod);
 //        int loopCount = 0;
-        while(OCS.getRemainingDataAllowance() > 0) {
+        while(chargingProcessContinue(OCS.getRemainingDataAllowance(), timePeriod)) {
             double randomConsumedGU = Math.random() * randomRange * defaultGU;
             System.out.printf("Random GU : %5.2f\n", randomConsumedGU);
             
@@ -96,9 +97,10 @@ public class GuReservationSimulator {
             
             System.out.printf("Remaining data allowance : %10.2f\n", OCS.getRemainingDataAllowance());
             
-//            if(timePeriod >= 50) {
-//            	break;
-//            }
+            if(timePeriod >= 50) {
+            	System.out.println("Time period exceed 50");
+            	break;
+            }
         }
         
         
@@ -118,7 +120,20 @@ public class GuReservationSimulator {
     private static void initializeUserEquipments(int numOfDevices, int option) {
     	double dataCollectionPeriods = 0;
     	reportInterval = 0;
-//    	chargingPeriods = 0;
+    	
+    	double[] totalDemands = new double[numOfDevices];
+    	double[] dataUsages = new double[numOfDevices];
+    	
+    	// configure total demand
+    	totalDemands[0] = 8604.985;
+    	totalDemands[1] = 8650.3365;
+    	totalDemands[2] = 8698.5925;
+    	
+    	// configure periodical data usage
+    	dataUsages[0] = 358.54;
+    	dataUsages[1] = 360.43;
+    	dataUsages[2] = 362.44;
+    	
     	if(option == 3) {
     		// enter some variable that IRS needs
     		System.out.print("Enter data collection periods(hour) : ");
@@ -139,7 +154,7 @@ public class GuReservationSimulator {
 				UeArr.add(new UserEquipment(i, OCS, "MS"));
 			}else if(option == 3) {
 				// Inventory-based reservation scheme
-				UeArr.add(new UserEquipment(i, OCS, chargingPeriods, dataCollectionPeriods, reportInterval, "IRS"));
+				UeArr.add(new UserEquipment(i, OCS, chargingPeriods, dataCollectionPeriods, reportInterval, totalDemands[i], dataUsages[i], "IRS"));
 			}
 		}
 	}
@@ -292,5 +307,15 @@ public class GuReservationSimulator {
     	
 		return new OnlineChargingSystem(OCF, ABMF, "IRS");
 	}
+    
+    private static boolean chargingProcessContinue(double remainingDataAllowance, double timePeriod) {
+    	boolean chargingProcessContinue = false;
+    	
+    	if(remainingDataAllowance > 0 || timePeriod <= chargingPeriods * 24) {
+    		chargingProcessContinue = true;
+    	}
+    	
+    	return chargingProcessContinue;
+    }
     
 }

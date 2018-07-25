@@ -48,9 +48,6 @@ public class OnlineChargingSystem {
         // Debit unit request, signals + 1
         numOfSignals += 1;
 //        System.out.println("Send Debit unit request");
-    	
-        // determine GU
-        double reservedGU = this.determineGU(hashtable);
         
         // Debit unit response, signals + 1
         numOfSignals += 1;
@@ -59,8 +56,15 @@ public class OnlineChargingSystem {
         // update the number of signals
         hashtable.put("numOfSignals", numOfSignals);
         
+        // compute the reserved granted unit
         double remainingBalance = this.ABMF.getRemainingDataAllowance();
+        hashtable.put("remainingDataAllowance", remainingBalance);
+        double reservedGU = this.determineGU(hashtable);
         
+        // subtract the reserved granted unit
+        this.getABMF().setRemainingDataAllowance(this.getRemainingDataAllowance() - reservedGU);
+        
+        /*
         if(remainingBalance >= reservedGU) {
             // remaining data allowance is enough
             this.ABMF.setRemainingDataAllowance(remainingBalance - reservedGU);
@@ -89,6 +93,7 @@ public class OnlineChargingSystem {
             System.out.printf("Reserve surplus GU : %5.0f\n", reservedGU);
 //            System.out.printf("Remaining data allowance : %10.2f\n", this.ABMF.getRemainingDataAllowance());
         }
+        */
         
         // send online charging response to tell the UE how much granted unit it can use
         return reservedGU;
@@ -175,12 +180,19 @@ public class OnlineChargingSystem {
     	int ueID = 0;
     	double avgDataRate = 0;
     	double remainingGU = 0;
+    	double totalDemand = 0;
     	double currentTimePeriod = 1;
     	
-    	if(hashtable.containsKey("ueID") && hashtable.containsKey("avgDataRate") && hashtable.containsKey("remainingGU") && hashtable.containsKey("timePeriod")) {
+    	if( hashtable.containsKey("ueID") && 
+    		hashtable.containsKey("avgDataRate") && 
+    		hashtable.containsKey("remainingGU") &&
+    		hashtable.containsKey("totalDemand") &&
+    		hashtable.containsKey("timePeriod")
+    		) {
     		ueID = ((Double)hashtable.get("ueID")).intValue();
     		avgDataRate = (double)hashtable.get("avgDataRate");
     		remainingGU = (double)hashtable.get("remainingGU");
+    		totalDemand = (double)hashtable.get("totalDemand");
     		currentTimePeriod = (double)hashtable.get("timePeriod");
     	}
     	
@@ -188,7 +200,7 @@ public class OnlineChargingSystem {
     	if(this.reservationSchemeName.equals("IRS")) {
     		OnlineChargingFunctionInventoryBasedReservationScheme IRSOCF = (OnlineChargingFunctionInventoryBasedReservationScheme)this.getOCF();
     		
-    		IRSOCF.receiveStatusReport(ueID, avgDataRate, remainingGU, currentTimePeriod);
+    		IRSOCF.receiveStatusReport(ueID, avgDataRate, remainingGU, totalDemand, currentTimePeriod);
     	}
     	
     	

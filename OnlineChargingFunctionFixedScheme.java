@@ -19,6 +19,13 @@ public class OnlineChargingFunctionFixedScheme extends OnlineChargingFunctionRes
 
     @Override
     public double determineGU(Hashtable hashtable) {
-        return this.defaultGU;
+    	double remainingDataAllowance = (double)hashtable.get("remainingDataAllowance");
+    	
+    	double reservedGU = this.defaultGU;
+    	if(reservedGU > remainingDataAllowance) {
+    		reservedGU = remainingDataAllowance;
+    	}
+    	
+        return reservedGU;
     }
 }
