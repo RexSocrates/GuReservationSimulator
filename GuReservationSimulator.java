@@ -73,8 +73,8 @@ public class GuReservationSimulator {
         
         // stimulate that time is moving
         int deviceCount = 0;
-        double timePeriod = 1;
-        reportCurrentStatus(timePeriod);
+        double timePeriod = 0;
+        reportCurrentStatus(timePeriod++);
 //        int loopCount = 0;
         while(chargingProcessContinue(OCS.getRemainingDataAllowance(), timePeriod)) {
             double randomConsumedGU = Math.random() * randomRange * defaultGU;
@@ -97,10 +97,10 @@ public class GuReservationSimulator {
             
             System.out.printf("Remaining data allowance : %10.2f\n", OCS.getRemainingDataAllowance());
             
-            if(timePeriod >= 50) {
-            	System.out.println("Time period exceed 50");
-            	break;
-            }
+//            if(timePeriod >= 50) {
+//            	System.out.println("Time period exceed 50");
+//            	break;
+//            }
         }
         
         

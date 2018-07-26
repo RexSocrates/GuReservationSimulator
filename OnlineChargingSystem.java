@@ -64,37 +64,6 @@ public class OnlineChargingSystem {
         // subtract the reserved granted unit
         this.getABMF().setRemainingDataAllowance(this.getRemainingDataAllowance() - reservedGU);
         
-        /*
-        if(remainingBalance >= reservedGU) {
-            // remaining data allowance is enough
-            this.ABMF.setRemainingDataAllowance(remainingBalance - reservedGU);
-            System.out.printf("Reserved GU : %5.0f\n", reservedGU);
-//            System.out.printf("Remaining data allowance : %10.2f\n", this.ABMF.getRemainingDataAllowance());
-        }else {
-            // remaining data allowance is not enough
-            
-            // set a flag to tell the device that the remaining data allowance is not enough, represented by 1
-            hashtable.put("dataAllowanceNotEnough", 1);
-            
-            // call the function to determine GU when the remaining data allowance is not enough
-            if(this.reservationSchemeName.equals("IRS")) {
-            	int ueID = ((Double)hashtable.get("UEID")).intValue();
-                double remainingDataAllowance = this.getRemainingDataAllowance();
-                OnlineChargingFunctionInventoryBasedReservationScheme irsOCF = (OnlineChargingFunctionInventoryBasedReservationScheme)this.getOCF();
-                reservedGU = irsOCF.getSurplusGu(ueID, remainingDataAllowance);
-            }else {
-            	double remainingDataAllowance = this.getRemainingDataAllowance();
-            	reservedGU = this.getOCF().getSurplusGu(remainingDataAllowance);
-            	
-            	// subtract the reserved GU 
-            	this.ABMF.setRemainingDataAllowance(remainingBalance - reservedGU);
-            }
-            
-            System.out.printf("Reserve surplus GU : %5.0f\n", reservedGU);
-//            System.out.printf("Remaining data allowance : %10.2f\n", this.ABMF.getRemainingDataAllowance());
-        }
-        */
-        
         // send online charging response to tell the UE how much granted unit it can use
         return reservedGU;
         
@@ -103,7 +72,7 @@ public class OnlineChargingSystem {
     // Account control operations
     
     // receive online charging request, session start, check balance
-    public Hashtable receiveOnlineChargingRequestSessionStart(int ueID, double numOfSignals) {
+    public Hashtable receiveOnlineChargingRequestSessionStart(int ueID, double numOfSignals, double timePeriod) {
         // Debit unit request, signals + 1
         numOfSignals += 1;
 //        System.out.println("Send Debit unit request");
@@ -118,6 +87,7 @@ public class OnlineChargingSystem {
         hashtable.put("UEID", (double)ueID);
         hashtable.put("numOfSignals", numOfSignals);
         hashtable.put("balance", this.ABMF.getRemainingDataAllowance());
+        hashtable.put("timePeriod", timePeriod);
         
         // reserve GU
         double reservedGU = this.reserveGrantedUnit(hashtable);

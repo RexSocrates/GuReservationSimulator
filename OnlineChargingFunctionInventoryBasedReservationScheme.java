@@ -24,6 +24,7 @@ public class OnlineChargingFunctionInventoryBasedReservationScheme extends Onlin
 	Hashtable remainingGUsHashtable;
 	
 	// EGU variables
+	Hashtable lastReservationTime;
 	// latest reporting time
 	Hashtable reportingTime;
 	// valid time or cycle time
@@ -51,6 +52,8 @@ public class OnlineChargingFunctionInventoryBasedReservationScheme extends Onlin
 		this.optimalGUsHashtable = new Hashtable<Integer, Double>();
 		// remaining GU
 		this.remainingGUsHashtable = new Hashtable<Integer, Double>();
+		// last reservation time
+		this.lastReservationTime = new Hashtable<Integer, Double>();
 		// latest reporting time
 		this.reportingTime = new Hashtable<Integer, Double>();
 		// EGU
@@ -103,19 +106,25 @@ public class OnlineChargingFunctionInventoryBasedReservationScheme extends Onlin
 	
 	// compute valid time, the time that the GU in the device is exhausted
 	public double computeValidTime(int ueID) {
-		// It's wrong formula ? : D(estimated total demand) / Q (optimal size of GU) * the length of each period
-		double totalDemand = 0;
-		double optimalGU = this.defaultGU;
-		
-		if(this.estimatedTotalDemandHashtable.containsKey(ueID) && this.optimalGUsHashtable.containsKey(ueID)) {
-			totalDemand = (double)this.estimatedTotalDemandHashtable.get(ueID);
-			optimalGU = (double)this.optimalGUsHashtable.get(ueID);
+		// formula : the time duration between each reservation = optimal size of GU / periodical data usage
+		double optimalGUsize = 0;
+		if(this.optimalGUsHashtable.containsKey(ueID)) {
+			optimalGUsize = (double)this.optimalGUsHashtable.get(ueID);
+		}
+		double periodicalDataUsage = 1;
+		if(this.dataUsageHashtable.containsKey(ueID)) {
+			periodicalDataUsage = (double)this.dataUsageHashtable.get(ueID);
 		}
 		
-		double validTime = totalDemand / optimalGU;
+		double expectedTimeDuration = optimalGUsize / periodicalDataUsage;
 		
-		// this is the variable to define the length of each period, we define it as an hour
-		double theLengthOfPeriod = 1;
+		// formula : valid time = last reservation time of UE + the time duration between each reservation
+		double ueLastReservationTime = 1;
+		if(this.lastReservationTime.contains(ueID)) {
+			ueLastReservationTime = (double)this.lastReservationTime.get(ueID);
+		}
+		
+		double validTime = ueLastReservationTime + expectedTimeDuration;
 		
 		
 		return validTime;
@@ -139,7 +148,6 @@ public class OnlineChargingFunctionInventoryBasedReservationScheme extends Onlin
 	// calculating EGU
 	public double getEgu(int ueID) {
 		// formula : getCompleteCycleExpectedGU() - remaining GU -> if the result is positive
-		double egu = 0;
 		
 		// get the remaining GU of the device
 		double remainingGU = 0;
@@ -150,8 +158,11 @@ public class OnlineChargingFunctionInventoryBasedReservationScheme extends Onlin
 		}
 		
 		// compute the EGU
-		if(this.getCompleteCycleExpectedGU(ueID) - remainingGU >= 0) {
-			egu = this.getCompleteCycleExpectedGU(ueID) - remainingGU;
+		double egu = 0;
+		double completeCycleExpectedGU = this.getCompleteCycleExpectedGU(ueID);
+		System.out.println("Complete cycle expected GU : " + completeCycleExpectedGU);
+		if(completeCycleExpectedGU - remainingGU >= 0) {
+			egu = completeCycleExpectedGU - remainingGU;
 		}
 		
 		// put the value in hash table
@@ -206,6 +217,13 @@ public class OnlineChargingFunctionInventoryBasedReservationScheme extends Onlin
 		
 		double insufficientGU = ueIdEGU / sumOfEGUs * remainingDataAllowance;
 		
+//		System.out.println("====================================");
+//		System.out.println("EGU : " + ueIdEGU);
+//		System.out.println("Sum of EGUs : " + sumOfEGUs);
+//		System.out.println("RD : " + remainingDataAllowance);
+//		System.out.println("Reserved GU : " + insufficientGU);
+//		System.out.println("");
+		
 		return insufficientGU;
 	}
 
@@ -215,17 +233,45 @@ public class OnlineChargingFunctionInventoryBasedReservationScheme extends Onlin
 		int ueID = ((Double)hashtable.get("UEID")).intValue();
 		
 		double sumOfEGUs = this.getSumOfEGUs();
+		/*
+		if(sumOfEGUs == 0) {
+			// assign sum of EGUs as the sum of optimal GU
+			int[] ueIDs = this.getKeys();
+			
+			for(int i = 0; i < ueIDs.length; i++) {
+				int currentID = ueIDs[i];
+				
+				if(this.optimalGUsHashtable.containsKey(currentID)) {
+					sumOfEGUs += (double)this.optimalGUsHashtable.get(currentID);
+				}
+			}
+		}
+		*/
+		
 		double remainingDataAllowance = (double)hashtable.get("remainingDataAllowance");
 		
 		double reservedGU = this.defaultGU;
 		// if the sum of EGUs <= remaining data allowance, then allocate the optimal granted unit for the device
 		if(sumOfEGUs <= remainingDataAllowance) {
 			if(this.optimalGUsHashtable.containsKey(ueID)) {
-				reservedGU = (double)this.optimalGUsHashtable.get(ueID);				
+				reservedGU = (double)this.optimalGUsHashtable.get(ueID);
 			}
 		}else {
 			reservedGU = this.getSurplusGu(ueID, remainingDataAllowance);
 		}
+		
+		// update last reservation time
+		double timePeriod = 1;
+		if(hashtable.containsKey("timePeriod")) {
+			timePeriod = (double)hashtable.get("timePeriod");
+		}
+		this.lastReservationTime.put(ueID, timePeriod);
+		
+		System.out.println("===================================");
+		System.out.println("UE ID : " + ueID);
+		System.out.println("Sum of EGUs : " + sumOfEGUs);
+		System.out.println("RD : " + remainingDataAllowance);
+		System.out.println("Reserved GU : " + reservedGU);
 		
 		return reservedGU;
 	}

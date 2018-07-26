@@ -223,7 +223,7 @@ public class UserEquipment {
     
     public void askNewGU(double sessionTotalGU, double timePeriod) {
     	// send online charging request to ask new GU
-    	boolean dataAllowanceNotEnough = this.sendOnlineChargingRequestSessionStart();
+    	boolean dataAllowanceNotEnough = this.sendOnlineChargingRequestSessionStart(timePeriod);
         
         if(dataAllowanceNotEnough) {
         	// when the remaining data allowance is not enough, session ends
@@ -246,14 +246,14 @@ public class UserEquipment {
     
     
     // session start, requesting GU
-    public boolean sendOnlineChargingRequestSessionStart() {
+    public boolean sendOnlineChargingRequestSessionStart(double timePeriod) {
     	// session counter += 1
         this.numberOfSessions += 1;
     	
 //        System.out.println("sendOnlineChargingRequestSessionStart");
         
         // call next function, the parameter is a signals counter, it will return the number of signals
-        Hashtable hashtable = this.OCS.receiveOnlineChargingRequestSessionStart(this.ueID, 1);
+        Hashtable hashtable = this.OCS.receiveOnlineChargingRequestSessionStart(this.ueID, 1, timePeriod);
         
         boolean dataAllowanceNotEnough = false;
         if(hashtable.containsKey("dataAllowanceNotEnough")) {
