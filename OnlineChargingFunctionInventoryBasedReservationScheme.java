@@ -219,23 +219,24 @@ public class OnlineChargingFunctionInventoryBasedReservationScheme extends Onlin
 		return insufficientGU;
 	}
 	
-	public double getSumOfEguAndGuFor(int ueID) {
+	public double getSumOfEguAndGuOf(int ueID) {
 		double optimalGuForUe = this.defaultGU;
 		if(this.optimalGUsHashtable.containsKey(ueID)) {
 			optimalGuForUe = (double)this.optimalGUsHashtable.get(ueID);
 		}
 		
-		// the total value of EGUs
-		double sumOfEGUs = this.getSumOfEGUs();
-		// the EGU of UE whose ID is ueID
-		double egu = 0;
-		if(this.EGUsHashtable.containsKey(ueID)) {
-			egu = (double)this.EGUsHashtable.get(ueID);
+		int[] ueIDs = this.getKeys();
+		double sumOfEguExceptUe = 0;
+		for(int i = 0; i < ueIDs.length; i++) {
+			int currentUeID = ueIDs[i];
+			if(currentUeID != ueID) {
+				sumOfEguExceptUe += this.getEgu(currentUeID);
+			}
 		}
 		
-		double totalGuValue = optimalGuForUe + sumOfEGUs - egu;
+		double totalValue = optimalGuForUe + sumOfEguExceptUe;
 		
-		return totalGuValue;
+		return totalValue;
 	}
 
 
@@ -243,7 +244,7 @@ public class OnlineChargingFunctionInventoryBasedReservationScheme extends Onlin
 	public double determineGU(Hashtable hashtable) {
 		int ueID = ((Double)hashtable.get("UEID")).intValue();
 		
-		double sumOfEGUs = this.getSumOfEguAndGuFor(ueID);
+		double sumOfEGUs = this.getSumOfEguAndGuOf(ueID);
 		double remainingDataAllowance = (double)hashtable.get("remainingDataAllowance");
 		
 		double reservedGU = this.defaultGU;
@@ -254,6 +255,7 @@ public class OnlineChargingFunctionInventoryBasedReservationScheme extends Onlin
 			}
 		}else {
 			reservedGU = this.getSurplusGu(ueID, sumOfEGUs, remainingDataAllowance);
+			hashtable.put("dataAllowanceNotEnough", 1);
 		}
 		
 		// update last reservation time
