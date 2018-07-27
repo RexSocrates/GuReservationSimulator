@@ -24,6 +24,7 @@ public class OnlineChargingFunctionFixedScheme extends OnlineChargingFunctionRes
     	double reservedGU = this.defaultGU;
     	if(reservedGU > remainingDataAllowance) {
     		reservedGU = remainingDataAllowance;
+    		hashtable.put("dataAllowanceNotEnough", 1);
     	}
     	
         return reservedGU;

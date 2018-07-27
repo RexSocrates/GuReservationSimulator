@@ -13,6 +13,7 @@ public class OnlineChargingFunctionInventoryBasedReservationScheme extends Onlin
 	
 	
 	// UE status report variables
+	double sumOfEGUs;
 	// total demand per month D 
 	Hashtable estimatedTotalDemandHashtable;
 	// declare a hash table to store the average data usage for each user equipment W
@@ -161,6 +162,7 @@ public class OnlineChargingFunctionInventoryBasedReservationScheme extends Onlin
 		double egu = 0;
 		double completeCycleExpectedGU = this.getCompleteCycleExpectedGU(ueID);
 		System.out.println("Complete cycle expected GU : " + completeCycleExpectedGU);
+		System.out.println("Remaining GU : " + remainingGU);
 		if(completeCycleExpectedGU - remainingGU >= 0) {
 			egu = completeCycleExpectedGU - remainingGU;
 		}
@@ -206,25 +208,34 @@ public class OnlineChargingFunctionInventoryBasedReservationScheme extends Onlin
 	}
 	
 	// get GU for the device when the remaining data allowance is not enough
-	public double getSurplusGu(int ueID, double remainingDataAllowance) {
-		double sumOfEGUs = this.getSumOfEGUs();
-		System.out.println("Sum of EGUs : " + sumOfEGUs);
-		
-		double ueIdEGU = this.defaultGU;
-		if(this.EGUsHashtable.contains(ueID)) {
-			ueIdEGU = (double)this.EGUsHashtable.get(ueID);
+	public double getSurplusGu(int ueID, double sumOfEGUs, double remainingDataAllowance) {
+		double optimalGuForUe = this.defaultGU;
+		if(this.optimalGUsHashtable.containsKey(ueID)) {
+			optimalGuForUe = (double)this.optimalGUsHashtable.get(ueID);
 		}
 		
-		double insufficientGU = ueIdEGU / sumOfEGUs * remainingDataAllowance;
-		
-//		System.out.println("====================================");
-//		System.out.println("EGU : " + ueIdEGU);
-//		System.out.println("Sum of EGUs : " + sumOfEGUs);
-//		System.out.println("RD : " + remainingDataAllowance);
-//		System.out.println("Reserved GU : " + insufficientGU);
-//		System.out.println("");
+		double insufficientGU = optimalGuForUe / sumOfEGUs * remainingDataAllowance;
 		
 		return insufficientGU;
+	}
+	
+	public double getSumOfEguAndGuFor(int ueID) {
+		double optimalGuForUe = this.defaultGU;
+		if(this.optimalGUsHashtable.containsKey(ueID)) {
+			optimalGuForUe = (double)this.optimalGUsHashtable.get(ueID);
+		}
+		
+		// the total value of EGUs
+		double sumOfEGUs = this.getSumOfEGUs();
+		// the EGU of UE whose ID is ueID
+		double egu = 0;
+		if(this.EGUsHashtable.containsKey(ueID)) {
+			egu = (double)this.EGUsHashtable.get(ueID);
+		}
+		
+		double totalGuValue = optimalGuForUe + sumOfEGUs - egu;
+		
+		return totalGuValue;
 	}
 
 
@@ -232,22 +243,7 @@ public class OnlineChargingFunctionInventoryBasedReservationScheme extends Onlin
 	public double determineGU(Hashtable hashtable) {
 		int ueID = ((Double)hashtable.get("UEID")).intValue();
 		
-		double sumOfEGUs = this.getSumOfEGUs();
-		/*
-		if(sumOfEGUs == 0) {
-			// assign sum of EGUs as the sum of optimal GU
-			int[] ueIDs = this.getKeys();
-			
-			for(int i = 0; i < ueIDs.length; i++) {
-				int currentID = ueIDs[i];
-				
-				if(this.optimalGUsHashtable.containsKey(currentID)) {
-					sumOfEGUs += (double)this.optimalGUsHashtable.get(currentID);
-				}
-			}
-		}
-		*/
-		
+		double sumOfEGUs = this.getSumOfEguAndGuFor(ueID);
 		double remainingDataAllowance = (double)hashtable.get("remainingDataAllowance");
 		
 		double reservedGU = this.defaultGU;
@@ -257,7 +253,7 @@ public class OnlineChargingFunctionInventoryBasedReservationScheme extends Onlin
 				reservedGU = (double)this.optimalGUsHashtable.get(ueID);
 			}
 		}else {
-			reservedGU = this.getSurplusGu(ueID, remainingDataAllowance);
+			reservedGU = this.getSurplusGu(ueID, sumOfEGUs, remainingDataAllowance);
 		}
 		
 		// update last reservation time
@@ -269,6 +265,7 @@ public class OnlineChargingFunctionInventoryBasedReservationScheme extends Onlin
 		
 		System.out.println("===================================");
 		System.out.println("UE ID : " + ueID);
+		System.out.println("Optimal GU : " + this.optimalGUsHashtable.get(ueID));
 		System.out.println("Sum of EGUs : " + sumOfEGUs);
 		System.out.println("RD : " + remainingDataAllowance);
 		System.out.println("Reserved GU : " + reservedGU);

@@ -114,7 +114,6 @@ public class GuReservationSimulator {
         System.out.printf("Monthly data allowance : %3.0f\n", totalDataAllowance);
         System.out.printf("Consumed GU random range : %3.0f\n", randomRange);
         System.out.printf("Default GU : %5.0f\n", defaultGU);
-        
     }
     
     private static void initializeUserEquipments(int numOfDevices, int option) {

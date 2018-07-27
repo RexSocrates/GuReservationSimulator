@@ -61,8 +61,19 @@ public class OnlineChargingSystem {
         hashtable.put("remainingDataAllowance", remainingBalance);
         double reservedGU = this.determineGU(hashtable);
         
-        // subtract the reserved granted unit
         this.getABMF().setRemainingDataAllowance(this.getRemainingDataAllowance() - reservedGU);
+        
+        /*
+        if(reservedGU <= this.getABMF().getRemainingDataAllowance()) {
+        	// subtract the reserved granted unit
+        	System.out.println("Data allowance enough");
+            this.getABMF().setRemainingDataAllowance(this.getRemainingDataAllowance() - reservedGU);
+        }else {
+        	System.out.println("Data allowance not enough");
+        	hashtable.put("dataAllowanceNotEnough", 1);
+        }
+        */
+        
         
         // send online charging response to tell the UE how much granted unit it can use
         return reservedGU;

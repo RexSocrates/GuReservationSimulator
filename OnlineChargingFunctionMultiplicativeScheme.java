@@ -35,13 +35,13 @@ public class OnlineChargingFunctionMultiplicativeScheme extends OnlineChargingFu
             j = (double)hashtable.get("reservationCount");
         }
         System.out.printf("J : %5.0f\n", j);
-        System.out.printf("J : %5.0f\n", j);
         double reservedGU = Math.ceil(j / this.c) * this.getDefaultGU();
         
         double remainingDataAllowance = (double)hashtable.get("remainingDataAllowance");
         
-        if(reservedGU < remainingDataAllowance) {
+        if(reservedGU >= remainingDataAllowance) {
         	reservedGU = remainingDataAllowance;
+        	hashtable.put("dataAllowanceNotEnough", 1);
         }
         
         return reservedGU;

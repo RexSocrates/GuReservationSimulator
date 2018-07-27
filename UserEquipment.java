@@ -207,6 +207,9 @@ public class UserEquipment {
     
     // to complete a session, giving a granted unit that a session needs and the time that the session created
     public void completeSession(double sessionTotalGU, double timePeriod) {
+    	// session counter += 1
+        this.numberOfSessions += 1;
+    	
     	// update the current time of the device
     	this.currentTimePeriod = timePeriod;
     	
@@ -224,6 +227,7 @@ public class UserEquipment {
     public void askNewGU(double sessionTotalGU, double timePeriod) {
     	// send online charging request to ask new GU
     	boolean dataAllowanceNotEnough = this.sendOnlineChargingRequestSessionStart(timePeriod);
+    	System.out.println("Ask new GU : data allowance not enough : " + dataAllowanceNotEnough);
         
         if(dataAllowanceNotEnough) {
         	// when the remaining data allowance is not enough, session ends
@@ -247,9 +251,6 @@ public class UserEquipment {
     
     // session start, requesting GU
     public boolean sendOnlineChargingRequestSessionStart(double timePeriod) {
-    	// session counter += 1
-        this.numberOfSessions += 1;
-    	
 //        System.out.println("sendOnlineChargingRequestSessionStart");
         
         // call next function, the parameter is a signals counter, it will return the number of signals
@@ -288,7 +289,7 @@ public class UserEquipment {
     		// the remaining GU in the device is not enough so keep asking new GU until the allocated GU is enough
     		
     		dataAllowanceNotEnough = this.sendOnlineChargingRequestSessionContinue(reservationCount++);
-    		
+    		System.out.println("consume GU : " + dataAllowanceNotEnough);
     		if(dataAllowanceNotEnough) {
     			// if the remaining GU is not enough then break the loop
     			break;
@@ -301,39 +302,6 @@ public class UserEquipment {
     		// if the remaining GU is enough then consume GU
     		this.setCurrentGU(this.getCurrentGU() - consumedGU);
     	}
-        
-    	/*
-        if(this.getCurrentGU() > consumedGU) {
-            // current GU is positive and enough for this activity
-        	System.out.printf("Enough Current device remaining GU : %5.1f\n", this.getCurrentGU());
-        	System.out.printf("Consumed GU : %f\n", consumedGU);
-            this.setCurrentGU(this.getCurrentGU() - consumedGU);
-        }else {
-            // trigger online charging request to ask for new GU, since current GU is not enough
-        	System.out.printf("Not Enough Current device remaining GU : %5.1f\n", this.getCurrentGU());
-        	System.out.printf("Consumed GU : %f\n", consumedGU);
-        	
-            int reservationCount = 0;
-            boolean dataAllowanceNotEnough = false;
-            do {
-                // to continue session
-                dataAllowanceNotEnough = sendOnlineChargingRequestSessionContinue(reservationCount++);
-                
-                if(dataAllowanceNotEnough) {
-                	// if the remaining data allowance is not enough, then break the loop
-                	break;
-                }
-            }while(this.getCurrentGU() < consumedGU);
-            
-            if(dataAllowanceNotEnough) {
-            	// if the remaining data allowance is not enough, then the session is failed
-            	this.sessionFailedTimes += 1;
-            }else {
-            	// if the remaining data  allowance is enough, then we can consume GU
-            	this.setCurrentGU(this.getCurrentGU() - consumedGU);
-            }
-        }
-        */
     }
     
     // session continue, requesting GU
