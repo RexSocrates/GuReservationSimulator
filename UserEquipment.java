@@ -167,12 +167,6 @@ public class UserEquipment {
     	return totalGuConsumption;
     }
     
-    // compute estimated total demand in a charging period
-//    public double computeTotalDemand() {
-//    	// formula : data usage (current total data usage / current time periods) * charging periods
-//    	return this.computePeriodicalDataUsage() * this.chargingPeriods;
-//    }
-    
     // Functions
     
     // return current status, including remaining GU of UE and the average data rate
@@ -232,6 +226,15 @@ public class UserEquipment {
         if(dataAllowanceNotEnough) {
         	// when the remaining data allowance is not enough, session ends
         	this.sendOnlineChargingRequestSessionEnd();
+        	
+        	if(sessionTotalGU <= this.getCurrentGU()) {
+        		// the allocated surplus GU is enough for this session
+        		this.setCurrentGU(this.getCurrentGU() - sessionTotalGU);
+        	}else {
+        		// the allocated surplus GU is not enough for this session
+        		this.setCurrentGU(0);
+        		this.sessionFailedTimes += 1;
+        	}
         }
         else {
         	// when the remaining data allowance is enough, session continues
@@ -260,7 +263,6 @@ public class UserEquipment {
         if(hashtable.containsKey("dataAllowanceNotEnough")) {
         	// if the key is contained in the hash table, then the remaining data allowance is not enough
         	dataAllowanceNotEnough = true;
-        	this.sessionFailedTimes += 1;
         }
         
         // keys : numOfSignals, balance, reservedGU

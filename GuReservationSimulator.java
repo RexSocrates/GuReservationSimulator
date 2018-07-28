@@ -310,15 +310,17 @@ public class GuReservationSimulator {
     private static boolean chargingProcessContinue(double remainingDataAllowance, double timePeriod) {
     	boolean chargingProcessContinue = true;
     	
+    	/*
     	if(remainingDataAllowance <= 0 && timePeriod > chargingPeriods * 24) {
     		chargingProcessContinue = false;
     	}
+    	*/
     	
-    	/*
+    	
     	if(remainingDataAllowance <= 0 && timePeriod > chargingPeriods * 24 && getSumOfRemainingGuInUEs() <= 0) {
     		chargingProcessContinue = false;
     	}
-    	*/
+    	
     	
     	return chargingProcessContinue;
     }
