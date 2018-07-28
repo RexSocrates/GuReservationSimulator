@@ -308,13 +308,31 @@ public class GuReservationSimulator {
 	}
     
     private static boolean chargingProcessContinue(double remainingDataAllowance, double timePeriod) {
-    	boolean chargingProcessContinue = false;
+    	boolean chargingProcessContinue = true;
     	
-    	if(remainingDataAllowance > 0 || timePeriod <= chargingPeriods * 24) {
-    		chargingProcessContinue = true;
+    	if(remainingDataAllowance <= 0 && timePeriod > chargingPeriods * 24) {
+    		chargingProcessContinue = false;
     	}
     	
+    	/*
+    	if(remainingDataAllowance <= 0 && timePeriod > chargingPeriods * 24 && getSumOfRemainingGuInUEs() <= 0) {
+    		chargingProcessContinue = false;
+    	}
+    	*/
+    	
     	return chargingProcessContinue;
+    }
+    
+    private static double getSumOfRemainingGuInUEs() {
+    	double sumOfRemainingGU = 0;
+    	
+    	for(int i = 0; i < UeArr.size(); i++) {
+    		UserEquipment currentUE = UeArr.get(i);
+    		double remainingGU = currentUE.getCurrentGU();
+    		sumOfRemainingGU += remainingGU;
+    	}
+    	
+    	return sumOfRemainingGU;
     }
     
 }

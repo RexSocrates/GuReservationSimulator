@@ -225,14 +225,22 @@ public class OnlineChargingFunctionInventoryBasedReservationScheme extends Onlin
 			optimalGuForUe = (double)this.optimalGUsHashtable.get(ueID);
 		}
 		
+//		System.out.println("===================================");
+//		System.out.println("UE ID : " + ueID);
+//		System.out.printf("Optimal GU reserved for UE : %f\n", optimalGuForUe);
+		
 		int[] ueIDs = this.getKeys();
 		double sumOfEguExceptUe = 0;
 		for(int i = 0; i < ueIDs.length; i++) {
 			int currentUeID = ueIDs[i];
 			if(currentUeID != ueID) {
-				sumOfEguExceptUe += this.getEgu(currentUeID);
+				double egu = this.getEgu(currentUeID);
+				sumOfEguExceptUe += egu;
+				System.out.println("Other's UE ID : " + currentUeID);
+				System.out.println("EGU : " + egu);
 			}
 		}
+//		System.out.println("===================================");
 		
 		double totalValue = optimalGuForUe + sumOfEguExceptUe;
 		
@@ -265,12 +273,14 @@ public class OnlineChargingFunctionInventoryBasedReservationScheme extends Onlin
 		}
 		this.lastReservationTime.put(ueID, timePeriod);
 		
+		/*
 		System.out.println("===================================");
 		System.out.println("UE ID : " + ueID);
 		System.out.println("Optimal GU : " + this.optimalGUsHashtable.get(ueID));
 		System.out.println("Sum of EGUs : " + sumOfEGUs);
 		System.out.println("RD : " + remainingDataAllowance);
 		System.out.println("Reserved GU : " + reservedGU);
+		*/
 		
 		return reservedGU;
 	}
