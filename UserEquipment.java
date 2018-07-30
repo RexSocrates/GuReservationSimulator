@@ -50,6 +50,9 @@ public class UserEquipment {
     // report interval
     double reportInterval;
     
+    // charging data
+    
+    
     // constructor for FS or MS
     public UserEquipment(int ID, OnlineChargingSystem OCS, String reservationScheme) {
         this.ueID = ID;
