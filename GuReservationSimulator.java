@@ -21,6 +21,7 @@ public class GuReservationSimulator {
     static double defaultGU = 0;
     static double chargingPeriods = 1;
     static double reportInterval = 1;
+    static int[] cellIDs;
 
     /**
      * @param args the command line arguments
@@ -34,6 +35,7 @@ public class GuReservationSimulator {
 //        System.out.print("Enter the number of devices : ");
 //        numOfDevices = input.nextInt();
 //        System.out.println("");
+        cellIDs = new int[numOfDevices];
         
         // print reservation scheme options
         String[] reservationSchemes = {
@@ -117,6 +119,26 @@ public class GuReservationSimulator {
     }
     
     private static void initializeUserEquipments(int numOfDevices, int option) {
+    	// randomly select the user equipment
+    	int[] cellIDs = new int[numOfDevices];
+    	for(int i = 0; i < numOfDevices; i++) {
+    		int cellID = (int)Math.random() * 10000;
+    		
+    		// check if the cell ID is in the array
+    		boolean cellIdInTheList = false;
+    		for(int j = 0; j < i; j++) {
+    			if(cellIDs[i] == cellIDs[j]) {
+    				cellIdInTheList = true;
+    			}
+    		}
+    		
+    		if(cellIdInTheList) {
+    			i--;
+    		}else {
+    			cellIDs[i] = cellID;
+    		}
+    	}
+    	
     	double dataCollectionPeriods = 0;
     	reportInterval = 0;
     	
@@ -144,65 +166,92 @@ public class GuReservationSimulator {
         	System.out.println("");
     	}
     	
-		for(int i = 0; i < numOfDevices; i++) {
+		for(int i = 0; i < cellIDs.length; i++) {
+			int cellID = cellIDs[i];
+			
 			if(option == 1 || option == 2) {
 				// fixed scheme
-				UeArr.add(new UserEquipment(i, OCS, "FS"));
+				UeArr.add(new UserEquipment(cellID, OCS, "FS"));
 			}else if(option == 2) {
 				// multiplicative scheme
-				UeArr.add(new UserEquipment(i, OCS, "MS"));
+				UeArr.add(new UserEquipment(cellID, OCS, "MS"));
 			}else if(option == 3) {
 				// Inventory-based reservation scheme
-				UeArr.add(new UserEquipment(i, OCS, chargingPeriods, dataCollectionPeriods, reportInterval, totalDemands[i], dataUsages[i], "IRS"));
+				UeArr.add(new UserEquipment(cellID, OCS, chargingPeriods, dataCollectionPeriods, reportInterval, totalDemands[i], dataUsages[i], "IRS"));
 			}
 		}
 	}
 
 	// File IO Functions
 	private static void readFile() throws FileNotFoundException {
-//		String[] fileNames = {
-//				"2013_11_01.csv",
-//				"2013_11_02.csv",
-//				"2013_11_03.csv",
-//				"2013_11_04.csv",
-//				"2013_11_05.csv",
-//				"2013_11_06.csv",
-//				"2013_11_07.csv",
-//		};
+		String[] fileNames = {
+				"2013_11_01_sum.csv"
+//				"2013_11_02_sum.csv",
+//				"2013_11_03_sum.csv",
+//				"2013_11_04_sum.csv",
+//				"2013_11_05_sum.csv",
+//				"2013_11_06_sum.csv",
+//				"2013_11_07_sum.csv",
+		};
 		
-		File file = new File("2013_11_01.csv");
-		Scanner inputFile = new Scanner(file);
 		
-		// remove title
-		inputFile.nextLine();
-		
-		long counter = 0;
-		while(inputFile.hasNextLine()) {
-			String dateStr = inputFile.next();
-			String record = inputFile.nextLine();
-			System.out.println("Counter : " + ++counter);
-//			System.out.println(record);
+		for(int i = 0; i < fileNames.length; i++) {
+			// declare an array to store daily usage data of 10000 cell, index is cell ID - 1
+			DailyUsage[] dailyUsageOfCells = new DailyUsage[10000];
+			// initialize the daily usage array
+			for(int cellID = 0; cellID < dailyUsageOfCells.length; cellID++) {
+				dailyUsageOfCells[cellID] = new DailyUsage();
+			}
 			
+			String fileName = fileNames[i];
 			
-			// split the single tuple
-			String[] data = record.split(",");
-			for(int i = 0; i < data.length; i++) {
-				if(i == 0) {
-					System.out.printf("Time : %s\n", data[i]);
-				}else if(i == 1) {
-					System.out.printf("Cell ID : %s\n", data[i]);
-				}else {
-					System.out.printf("Data : %s\n", data[i]);
+			File file = new File(fileName);
+			Scanner inputFile = new Scanner(file);
+			
+			// remove title
+			inputFile.nextLine();
+			
+			while(inputFile.hasNext()) {
+				// read a single line
+				String record = inputFile.nextLine();
+				
+				// split a record tuple
+				String[] recordData = record.split(",");
+				String dateAndTime = recordData[0];
+				int cellID = Integer.parseInt(recordData[1]);
+				double totalUsage = Double.parseDouble(recordData[2]);
+				
+				// split the date and time string
+				String[] dateAndTimeData = dateAndTime.split(" ");
+				String date = dateAndTimeData[0];
+				String time = dateAndTimeData[1];
+				
+				String[] timeData = time.split(":");
+				int hour = Integer.parseInt(timeData[0]);
+				
+				dailyUsageOfCells[cellID - 1].addHourlyUsage(hour, totalUsage);
+			}
+			
+			inputFile.close();
+			
+			// put the daily usage of cells in the user equipment
+			for(int cellIdIndex = 0; i < cellIDs.length; i++) {
+				int cellID = cellIDs[cellIdIndex];
+				
+				DailyUsage dailyUsageOfCell = dailyUsageOfCells[cellID - 1];
+				
+				// find the UE whose UE ID is the value of cell ID
+				for(int ueIndex = 0; ueIndex < UeArr.size(); ueIndex++) {
+					UserEquipment ue = UeArr.get(ueIndex);
+					
+					if(ue.getUeID() == cellID) {
+						// i is the date index
+						ue.setDailyUsage(i, dailyUsageOfCell);
+						break;
+					}
 				}
 			}
-			
-			System.out.println("");
-			if(counter >= 80000) {
-				break;
-			}
 		}
-		
-		inputFile.close();
 		
 	}
 	

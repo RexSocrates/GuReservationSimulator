@@ -2,6 +2,7 @@ import java.util.Arrays;
 import java.util.Hashtable;
 
 public class DailyUsage {
+	// key is time, value is total usage in that time
 	Hashtable<Integer, Double> hourlyUsage;
 	
 	public DailyUsage() {
