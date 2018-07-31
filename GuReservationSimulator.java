@@ -8,6 +8,7 @@ import java.util.Scanner;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Hashtable;
 
 /**
@@ -21,6 +22,7 @@ public class GuReservationSimulator {
     static double defaultGU = 0;
     static double chargingPeriods = 1;
     static double reportInterval = 1;
+    static double dataCollectionPeriods = 1;
     static int[] cellIDs;
 
     /**
@@ -29,7 +31,6 @@ public class GuReservationSimulator {
      */
     public static void main(String[] args) throws FileNotFoundException {
         // TODO code application logic here
-//    	readFile();
     	
         int numOfDevices = 3;
 //        System.out.print("Enter the number of devices : ");
@@ -67,6 +68,7 @@ public class GuReservationSimulator {
         
         // add the user equipments into the array
         initializeUserEquipments(numOfDevices, option);
+        readTotalUsageFile();
         
         // stimulate that there are lots of sessions should be completed
         System.out.print("Enter the random GU range ( > 0) : ");
@@ -117,8 +119,8 @@ public class GuReservationSimulator {
         System.out.printf("Consumed GU random range : %3.0f\n", randomRange);
         System.out.printf("Default GU : %5.0f\n", defaultGU);
     }
-    
-    private static void initializeUserEquipments(int numOfDevices, int option) {
+
+	private static void initializeUserEquipments(int numOfDevices, int option) throws FileNotFoundException {
     	// randomly select the user equipment
     	int[] cellIDs = new int[numOfDevices];
     	for(int i = 0; i < numOfDevices; i++) {
@@ -139,21 +141,23 @@ public class GuReservationSimulator {
     		}
     	}
     	
-    	double dataCollectionPeriods = 0;
+    	Arrays.sort(cellIDs);
+    	
+    	dataCollectionPeriods = 0;
     	reportInterval = 0;
     	
     	double[] totalDemands = new double[numOfDevices];
     	double[] dataUsages = new double[numOfDevices];
     	
     	// configure total demand
-    	totalDemands[0] = 8604.985;
-    	totalDemands[1] = 8650.3365;
-    	totalDemands[2] = 8698.5925;
+//    	totalDemands[0] = 8604.985;
+//    	totalDemands[1] = 8650.3365;
+//    	totalDemands[2] = 8698.5925;
     	
     	// configure periodical data usage
-    	dataUsages[0] = 358.54;
-    	dataUsages[1] = 360.43;
-    	dataUsages[2] = 362.44;
+//    	dataUsages[0] = 358.54;
+//    	dataUsages[1] = 360.43;
+//    	dataUsages[2] = 362.44;
     	
     	if(option == 3) {
     		// enter some variable that IRS needs
@@ -164,7 +168,14 @@ public class GuReservationSimulator {
         	System.out.print("Enter report interval(hour) : ");
         	reportInterval = input.nextDouble();
         	System.out.println("");
+        	
+        	Hashtable dataRateAndTotalUsage = getPeriodicalDataUsageAndTotalUsage(numOfDevices, cellIDs);
+        	
+        	totalDemands = (double[]) dataRateAndTotalUsage.get("totalUsage");
+        	dataUsages = (double[]) dataRateAndTotalUsage.get("dataRate");
     	}
+    	
+    	
     	
 		for(int i = 0; i < cellIDs.length; i++) {
 			int cellID = cellIDs[i];
@@ -183,15 +194,15 @@ public class GuReservationSimulator {
 	}
 
 	// File IO Functions
-	private static void readFile() throws FileNotFoundException {
+	private static void readTotalUsageFile() throws FileNotFoundException {
 		String[] fileNames = {
-				"2013_11_01_sum.csv"
-//				"2013_11_02_sum.csv",
-//				"2013_11_03_sum.csv",
-//				"2013_11_04_sum.csv",
-//				"2013_11_05_sum.csv",
-//				"2013_11_06_sum.csv",
-//				"2013_11_07_sum.csv",
+				"2013_11_01_sum.csv",
+				"2013_11_02_sum.csv",
+				"2013_11_03_sum.csv",
+				"2013_11_04_sum.csv",
+				"2013_11_05_sum.csv",
+				"2013_11_06_sum.csv",
+				"2013_11_07_sum.csv",
 		};
 		
 		
@@ -252,6 +263,55 @@ public class GuReservationSimulator {
 				}
 			}
 		}
+	}
+	
+	private static Hashtable getPeriodicalDataUsageAndTotalUsage(int numberOfDevices, int[] cellIDs) throws FileNotFoundException {
+		Hashtable<String, double[]> dataRateAndTotalUsage = new Hashtable<String, double[]>();
+		double[] dataRate = new double[numberOfDevices];
+		double[] totalUsage = new double[numberOfDevices];
+		
+		readDataRateFile(cellIDs, dataRate, totalUsage);
+		
+		dataRateAndTotalUsage.put("dataRate", dataRate);
+		dataRateAndTotalUsage.put("totalUsage", totalUsage);
+		
+		return dataRateAndTotalUsage;
+	}
+	
+	// read periodical data rate and total usage
+	private static void readDataRateFile(int[] cellIDs, double[] dataRate, double[] totalUsageArr) throws FileNotFoundException {
+		String fileName = "accumulatedTotalUsage.csv";
+		
+		File file = new File(fileName);
+		Scanner inputFile = new Scanner(file);
+		
+		// remove title
+		inputFile.nextLine();
+		
+		int cellIdIndex = 0;
+		
+		while(inputFile.hasNext()) {
+			String singleTuple = inputFile.nextLine();
+			
+			// split a tuple
+			String[] tupleData = singleTuple.split(",");
+			int cellID = Integer.parseInt(tupleData[0]);
+			double time = Double.parseDouble(tupleData[1]);
+			double periodicalDataUsage = Double.parseDouble(tupleData[2]);
+			double totalUsage = Double.parseDouble(tupleData[3]);
+			
+			if(cellID == cellIDs[cellIdIndex] && time == dataCollectionPeriods) {
+				dataRate[cellIdIndex] = periodicalDataUsage;
+				totalUsageArr[cellIdIndex] = totalUsage;
+				cellIdIndex += 1;
+			}
+			
+			if(cellIdIndex >= cellIDs.length) {
+				break;
+			}
+		}
+		
+		inputFile.close();
 		
 	}
 	

@@ -77,7 +77,6 @@ public class UserEquipment {
         this.reservationScheme = reservationScheme;
         this.reportUeStatus = true;
         this.currentTimePeriod = 1;
-    	
         this.totalDemand = totalDemand;
         this.periodicalDataUsage = periodicalDataUsage;
         
