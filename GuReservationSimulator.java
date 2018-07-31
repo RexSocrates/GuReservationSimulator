@@ -20,7 +20,7 @@ public class GuReservationSimulator {
     static ArrayList<UserEquipment> UeArr = new ArrayList<UserEquipment>();
     static OnlineChargingSystem OCS;
     static double defaultGU = 0;
-    static double chargingPeriods = 1;
+    static double chargingPeriods = 7;
     static double reportInterval = 1;
     static double dataCollectionPeriods = 1;
     static int[] cellIDs;
@@ -53,9 +53,11 @@ public class GuReservationSimulator {
         System.out.println("");
         
         // configure the experiment
-        System.out.print("Enter the monthly data allowance(GB) : ");
-        double totalDataAllowance = input.nextDouble();
-        System.out.println("");
+//        System.out.print("Enter the monthly data allowance(GB) : ");
+//        double totalDataAllowance = input.nextDouble();
+//        System.out.println("");
+        // total data allowance = 130(population of a cell) * 9(average data allowance of each person)
+        double totalDataAllowance = 130 * 9 * numOfDevices;
         
         switch(option) {
             case 1 : OCS = fixedScheme(totalDataAllowance);
@@ -71,12 +73,12 @@ public class GuReservationSimulator {
         readTotalUsageFile();
         
         // stimulate that there are lots of sessions should be completed
-        System.out.print("Enter the random GU range ( > 0) : ");
-        double randomRange = input.nextDouble();
+//        System.out.print("Enter the random GU range ( > 0) : ");
+//        double randomRange = input.nextDouble();
         
         
         // stimulate that time is moving
-        int deviceCount = 0;
+//        int deviceCount = 0;
         double timePeriod = 0;
         reportCurrentStatus(timePeriod++);
 //        int loopCount = 0;
@@ -131,7 +133,7 @@ public class GuReservationSimulator {
         System.out.printf("Number of devices : %d\n", numOfDevices);
         System.out.printf("Reservation scheme : %s\n", reservationSchemes[option - 1]);
         System.out.printf("Monthly data allowance : %3.0f\n", totalDataAllowance);
-        System.out.printf("Consumed GU random range : %3.0f\n", randomRange);
+//        System.out.printf("Consumed GU random range : %3.0f\n", randomRange);
         System.out.printf("Default GU : %5.0f\n", defaultGU);
     }
 
@@ -164,16 +166,6 @@ public class GuReservationSimulator {
     	double[] totalDemands = new double[numOfDevices];
     	double[] dataUsages = new double[numOfDevices];
     	
-    	// configure total demand
-//    	totalDemands[0] = 8604.985;
-//    	totalDemands[1] = 8650.3365;
-//    	totalDemands[2] = 8698.5925;
-    	
-    	// configure periodical data usage
-//    	dataUsages[0] = 358.54;
-//    	dataUsages[1] = 360.43;
-//    	dataUsages[2] = 362.44;
-    	
     	if(option == 3) {
     		// enter some variable that IRS needs
     		System.out.print("Enter data collection periods(hour) : ");
@@ -184,7 +176,7 @@ public class GuReservationSimulator {
         	reportInterval = input.nextDouble();
         	System.out.println("");
         	
-        	Hashtable dataRateAndTotalUsage = getPeriodicalDataUsageAndTotalUsage(numOfDevices, cellIDs);
+        	Hashtable<String, double[]> dataRateAndTotalUsage = getPeriodicalDataUsageAndTotalUsage(numOfDevices, cellIDs);
         	
         	totalDemands = (double[]) dataRateAndTotalUsage.get("totalUsage");
         	dataUsages = (double[]) dataRateAndTotalUsage.get("dataRate");
@@ -240,7 +232,7 @@ public class GuReservationSimulator {
 		inputFile.close();
 	}
 	
-	private static Hashtable getPeriodicalDataUsageAndTotalUsage(int numberOfDevices, int[] cellIDs) throws FileNotFoundException {
+	private static Hashtable<String, double[]> getPeriodicalDataUsageAndTotalUsage(int numberOfDevices, int[] cellIDs) throws FileNotFoundException {
 		Hashtable<String, double[]> dataRateAndTotalUsage = new Hashtable<String, double[]>();
 		double[] dataRate = new double[numberOfDevices];
 		double[] totalUsage = new double[numberOfDevices];
@@ -321,6 +313,7 @@ public class GuReservationSimulator {
     	// hyper-parameters
         System.out.print("Enter the default GU(MB) for fixed scheme : ");
         defaultGU = input.nextDouble();
+        defaultGU = defaultGU * 130;
         System.out.println("");
         
         
@@ -340,6 +333,7 @@ public class GuReservationSimulator {
     	// hyper-parameters
         System.out.print("Enter default GU(MB) for multiplicative scheme : ");
         defaultGU = input.nextDouble();
+        defaultGU = defaultGU * 130;
         System.out.println("");
         
         System.out.print("Enter C : ");
@@ -368,6 +362,7 @@ public class GuReservationSimulator {
     	
 		System.out.print("Enter default GU(MB) for inventory-based reservation scheme : ");
 		defaultGU = input.nextDouble();
+		defaultGU = defaultGU * 130;
 		System.out.println("");
 		
 //		System.out.print("Enter the signals of each report");
