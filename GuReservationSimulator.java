@@ -81,18 +81,31 @@ public class GuReservationSimulator {
         reportCurrentStatus(timePeriod++);
 //        int loopCount = 0;
         while(chargingProcessContinue(OCS.getRemainingDataAllowance(), timePeriod)) {
-            double randomConsumedGU = Math.random() * randomRange * defaultGU;
-            System.out.printf("Random GU : %5.2f\n", randomConsumedGU);
+        	
+        	for(int i = 0; i < UeArr.size(); i++) {
+        		UserEquipment ue = UeArr.get(i);
+        		DailyUsage ueDailyUsage = ue.getDailyUsage();
+        		int intTime = (new Double(timePeriod)).intValue();
+        		double consumedGU = ueDailyUsage.getHourlyUsage(intTime);
+        		
+        		System.out.println("UE ID : " + ue.getUeID());
+        		System.out.println("Consumed GU : " + consumedGU);
+        		
+        		ue.completeSession(consumedGU, timePeriod);
+        	}
+        	
+//            double randomConsumedGU = Math.random() * randomRange * defaultGU;
+//            System.out.printf("Random GU : %5.2f\n", randomConsumedGU);
             
-            UserEquipment ue = UeArr.get(deviceCount);
-            deviceCount = (deviceCount + 1) % UeArr.size();
+//            UserEquipment ue = UeArr.get(deviceCount);
+//            deviceCount = (deviceCount + 1) % UeArr.size();
             
-            ue.completeSession(randomConsumedGU, timePeriod);
+//            ue.completeSession(randomConsumedGU, timePeriod);
             
             // randomly determine that the time move
-            if(Math.random() * 10 >= 5) {
-            	System.out.println("Time counter : " + timePeriod++);
-            }
+//            if(Math.random() * 10 >= 5) {
+//            	System.out.println("Time counter : " + timePeriod++);
+//            }
             
             // report current status once every report interval
         	if(timePeriod % reportInterval == 0) {
@@ -100,6 +113,8 @@ public class GuReservationSimulator {
         	}
             
             System.out.printf("Remaining data allowance : %10.2f\n", OCS.getRemainingDataAllowance());
+            
+            timePeriod += 1;
             
 //            if(timePeriod >= 50) {
 //            	System.out.println("Time period exceed 50");
@@ -194,75 +209,35 @@ public class GuReservationSimulator {
 	}
 
 	// File IO Functions
+	// read total usage from the file
 	private static void readTotalUsageFile() throws FileNotFoundException {
-		String[] fileNames = {
-				"2013_11_01_sum.csv",
-				"2013_11_02_sum.csv",
-				"2013_11_03_sum.csv",
-				"2013_11_04_sum.csv",
-				"2013_11_05_sum.csv",
-				"2013_11_06_sum.csv",
-				"2013_11_07_sum.csv",
-		};
+		String fileName = "sevenDaysRecords.csv";
+		File file = new File(fileName);
+		Scanner inputFile = new Scanner(file);
 		
+		// remove title
+		inputFile.nextLine();
 		
-		for(int i = 0; i < fileNames.length; i++) {
-			// declare an array to store daily usage data of 10000 cell, index is cell ID - 1
-			DailyUsage[] dailyUsageOfCells = new DailyUsage[10000];
-			// initialize the daily usage array
-			for(int cellID = 0; cellID < dailyUsageOfCells.length; cellID++) {
-				dailyUsageOfCells[cellID] = new DailyUsage();
-			}
+		while(inputFile.hasNext()) {
+			String tuple = inputFile.nextLine();
+			String[] tupleData = tuple.split(",");
+			int cellID = Integer.parseInt(tupleData[0]);
+			double time = Double.parseDouble(tupleData[1]);
+			double totalUsage = Double.parseDouble(tupleData[2]);
 			
-			String fileName = fileNames[i];
-			
-			File file = new File(fileName);
-			Scanner inputFile = new Scanner(file);
-			
-			// remove title
-			inputFile.nextLine();
-			
-			while(inputFile.hasNext()) {
-				// read a single line
-				String record = inputFile.nextLine();
+			for(int i = 0; i < UeArr.size(); i++) {
+				UserEquipment ue = UeArr.get(i);
 				
-				// split a record tuple
-				String[] recordData = record.split(",");
-				String dateAndTime = recordData[0];
-				int cellID = Integer.parseInt(recordData[1]);
-				double totalUsage = Double.parseDouble(recordData[2]);
-				
-				// split the date and time string
-				String[] dateAndTimeData = dateAndTime.split(" ");
-				String date = dateAndTimeData[0];
-				String time = dateAndTimeData[1];
-				
-				String[] timeData = time.split(":");
-				int hour = Integer.parseInt(timeData[0]);
-				
-				dailyUsageOfCells[cellID - 1].addHourlyUsage(hour, totalUsage);
-			}
-			
-			inputFile.close();
-			
-			// put the daily usage of cells in the user equipment
-			for(int cellIdIndex = 0; i < cellIDs.length; i++) {
-				int cellID = cellIDs[cellIdIndex];
-				
-				DailyUsage dailyUsageOfCell = dailyUsageOfCells[cellID - 1];
-				
-				// find the UE whose UE ID is the value of cell ID
-				for(int ueIndex = 0; ueIndex < UeArr.size(); ueIndex++) {
-					UserEquipment ue = UeArr.get(ueIndex);
-					
-					if(ue.getUeID() == cellID) {
-						// i is the date index
-						ue.setDailyUsage(i, dailyUsageOfCell);
-						break;
-					}
+				if(cellID == ue.getUeID()) {
+					DailyUsage ueDailyUsage = ue.getDailyUsage();
+					int intTime = (new Double(time)).intValue();
+					ueDailyUsage.addHourlyUsage(intTime, totalUsage);
+					break;
 				}
 			}
 		}
+		
+		inputFile.close();
 	}
 	
 	private static Hashtable getPeriodicalDataUsageAndTotalUsage(int numberOfDevices, int[] cellIDs) throws FileNotFoundException {

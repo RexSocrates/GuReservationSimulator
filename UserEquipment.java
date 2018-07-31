@@ -51,7 +51,7 @@ public class UserEquipment {
     double reportInterval;
     
     // charging data, index is date, value is the daily usage of the cell
-    ArrayList<DailyUsage> dailyUsageData;
+    DailyUsage dailyUsage;
     
     // constructor for FS or MS
     public UserEquipment(int ID, OnlineChargingSystem OCS, String reservationScheme) {
@@ -64,7 +64,7 @@ public class UserEquipment {
         this.reportUeStatus = false;
         this.currentTimePeriod = 1;
         // charging data
-        this.dailyUsageData = new ArrayList<DailyUsage>();
+        this.dailyUsage = new DailyUsage();
     }
     
     // constructor for IRS
@@ -86,7 +86,7 @@ public class UserEquipment {
     	this.reportInterval = reportInterval;
     	
     	// charging data
-    	this.dailyUsageData = new ArrayList<DailyUsage>();
+    	this.dailyUsage = new DailyUsage();
     }
 
     // getter and setter
@@ -139,20 +139,12 @@ public class UserEquipment {
     	return successfulTimes / this.numberOfSessions;
     }
     
-    public ArrayList<DailyUsage> getDailyUsageData() {
-    	return this.dailyUsageData;
+    public DailyUsage getDailyUsage() {
+    	return this.dailyUsage;
     }
     
-    public void setDailyUsageData(ArrayList<DailyUsage> dailyUsageData) {
-    	this.dailyUsageData = dailyUsageData;
-    }
-    
-    public DailyUsage getDailyUsage(int dateIndex) {
-    	return this.dailyUsageData.get(dateIndex - 1);
-    }
-    
-    public void setDailyUsage(int dateIndex, DailyUsage dailyUsage) {
-    	this.dailyUsageData.add(dateIndex, dailyUsage);
+    public void setDailyUsage(DailyUsage dailyUsage) {
+    	this.dailyUsage = dailyUsage;
     }
     
     
