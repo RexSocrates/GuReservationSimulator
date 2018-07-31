@@ -27,6 +27,7 @@ public class GuReservationSimulator {
     static double reportInterval = 1;
     static double dataCollectionPeriods = 1;
     static int[] cellIDs;
+    static String resultFileName = "";
 
     /**
      * @param args the command line arguments
@@ -34,11 +35,14 @@ public class GuReservationSimulator {
      */
     public static void main(String[] args) throws FileNotFoundException {
         // TODO code application logic here
+    	System.out.print("Enter result file name : ");
+    	resultFileName = input.next();
+    	System.out.println("");
     	
-        int numOfDevices = 3;
-//        System.out.print("Enter the number of devices : ");
-//        numOfDevices = input.nextInt();
-//        System.out.println("");
+//        int numOfDevices = 3;
+        System.out.print("Enter the number of devices : ");
+        int numOfDevices = input.nextInt();
+        System.out.println("");
         cellIDs = new int[numOfDevices];
         
         // print reservation scheme options
@@ -431,11 +435,13 @@ public class GuReservationSimulator {
     }
     
     private static void writeExperimentResult(int numOfDevices, String reservationScheme, double totalDataAllowance, double defaultGU) throws FileNotFoundException {
-    	DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss");
-    	LocalDate localDate = LocalDate.now();
-    	String localDateStr = dtf.format(localDate) + ".txt";
+//    	DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss");
+//    	LocalDate localDate = LocalDate.now();
+//    	String localDateStr = dtf.format(localDate) + ".txt";
     	
-    	PrintWriter pw = new PrintWriter(localDateStr);
+    	resultFileName = resultFileName + ".txt";
+    	
+    	PrintWriter pw = new PrintWriter(resultFileName);
     	
     	double totalSignals = 0;
     	
