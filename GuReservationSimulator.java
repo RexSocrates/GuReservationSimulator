@@ -7,6 +7,9 @@
 import java.util.Scanner;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Hashtable;
@@ -135,13 +138,15 @@ public class GuReservationSimulator {
         System.out.printf("Monthly data allowance : %3.0f\n", totalDataAllowance);
 //        System.out.printf("Consumed GU random range : %3.0f\n", randomRange);
         System.out.printf("Default GU : %5.0f\n", defaultGU);
+        
+        writeExperimentResult(numOfDevices, reservationSchemes[option - 1], totalDataAllowance, defaultGU);
     }
 
 	private static void initializeUserEquipments(int numOfDevices, int option) throws FileNotFoundException {
     	// randomly select the user equipment
     	int[] cellIDs = new int[numOfDevices];
     	for(int i = 0; i < numOfDevices; i++) {
-    		int cellID = (int)Math.random() * 10000;
+    		int cellID = (int)(Math.random() * 10001);
     		
     		// check if the cell ID is in the array
     		boolean cellIdInTheList = false;
@@ -217,6 +222,11 @@ public class GuReservationSimulator {
 			double time = Double.parseDouble(tupleData[1]);
 			double totalUsage = Double.parseDouble(tupleData[2]);
 			
+			System.out.println("==================================");
+			System.out.println("Cell ID : " + cellID);
+			System.out.println("Time : " + time);
+			System.out.println("Total usage : " + totalUsage);
+			
 			for(int i = 0; i < UeArr.size(); i++) {
 				UserEquipment ue = UeArr.get(i);
 				
@@ -266,6 +276,10 @@ public class GuReservationSimulator {
 			double time = Double.parseDouble(tupleData[1]);
 			double periodicalDataUsage = Double.parseDouble(tupleData[2]);
 			double totalUsage = Double.parseDouble(tupleData[3]);
+			
+			System.out.println("**************************");
+			System.out.println("Cell ID : " + cellID);
+			System.out.println("Time : " + time);
 			
 			if(cellID == cellIDs[cellIdIndex] && time == dataCollectionPeriods) {
 				dataRate[cellIdIndex] = periodicalDataUsage;
@@ -415,5 +429,36 @@ public class GuReservationSimulator {
     	
     	return sumOfRemainingGU;
     }
+    
+    private static void writeExperimentResult(int numOfDevices, String reservationScheme, double totalDataAllowance, double defaultGU) throws FileNotFoundException {
+    	DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss");
+    	LocalDate localDate = LocalDate.now();
+    	String localDateStr = dtf.format(localDate) + ".txt";
+    	
+    	PrintWriter pw = new PrintWriter(localDateStr);
+    	
+    	double totalSignals = 0;
+    	
+    	// print experiment configuration
+    	pw.printf("Number of devices : %d\n", numOfDevices);
+    	pw.printf("Reservation scheme : %s\n", reservationScheme);
+    	pw.printf("Monthly data allowance : %3.0f\n", totalDataAllowance);
+    	pw.printf("Default GU : %5.0f\n", defaultGU);
+    	pw.println();
+		
+		for(int i = 0; i < UeArr.size(); i++) {
+			UserEquipment device = UeArr.get(i);
+			
+			double signals = device.getProducedSignals();
+			totalSignals += signals;
+			pw.printf("Signals : %3.0f\n", signals);
+			pw.printf("Session successful rate : %5.0f", device.getSuccessfulRate() * 100);
+			pw.println("%");
+		}
+		pw.printf("Total signals : %5.0f\n", totalSignals);
+		
+		pw.close();
+    	
+	}
     
 }
