@@ -458,6 +458,7 @@ public class GuReservationSimulator {
     	pw.printf("Default GU : %5.0f\n", defaultGU);
     	pw.println();
 		
+    	double totalSucdcessfulRate = 0;
 		for(int i = 0; i < UeArr.size(); i++) {
 			UserEquipment device = UeArr.get(i);
 			
@@ -467,7 +468,11 @@ public class GuReservationSimulator {
 			pw.printf("Signals : %3.0f\n", signals);
 			pw.printf("Session successful rate : %5.0f", device.getSuccessfulRate() * 100);
 			pw.println("%");
+			
+			totalSucdcessfulRate += device.getSuccessfulRate();
 		}
+		pw.printf("Average successful rate : %f", totalSucdcessfulRate);
+		pw.println("%");
 		pw.printf("Total signals : %5.0f\n", totalSignals);
 		
 		pw.close();
