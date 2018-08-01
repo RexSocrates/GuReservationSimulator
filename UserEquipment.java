@@ -311,7 +311,7 @@ public class UserEquipment {
     		// the remaining GU in the device is not enough so keep asking new GU until the allocated GU is enough
     		
     		dataAllowanceNotEnough = this.sendOnlineChargingRequestSessionContinue(reservationCount++);
-    		System.out.println("consume GU : " + dataAllowanceNotEnough);
+    		System.out.println("consume GU data allowance not enough : " + dataAllowanceNotEnough);
     		if(dataAllowanceNotEnough) {
     			// if the remaining GU is not enough then break the loop
     			break;

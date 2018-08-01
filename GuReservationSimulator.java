@@ -90,7 +90,7 @@ public class GuReservationSimulator {
         reportCurrentStatus(timePeriod++);
 //        int loopCount = 0;
         while(chargingProcessContinue(OCS.getRemainingDataAllowance(), timePeriod)) {
-        	
+        	System.out.println("Time period : " + timePeriod);
         	for(int i = 0; i < UeArr.size(); i++) {
         		UserEquipment ue = UeArr.get(i);
         		DailyUsage ueDailyUsage = ue.getDailyUsage();
@@ -103,20 +103,6 @@ public class GuReservationSimulator {
         		ue.completeSession(consumedGU, timePeriod);
         	}
         	
-//            double randomConsumedGU = Math.random() * randomRange * defaultGU;
-//            System.out.printf("Random GU : %5.2f\n", randomConsumedGU);
-            
-//            UserEquipment ue = UeArr.get(deviceCount);
-//            deviceCount = (deviceCount + 1) % UeArr.size();
-            
-//            ue.completeSession(randomConsumedGU, timePeriod);
-            
-            // randomly determine that the time move
-//            if(Math.random() * 10 >= 5) {
-//            	System.out.println("Time counter : " + timePeriod++);
-//            }
-            
-            // report current status once every report interval
         	if(timePeriod % reportInterval == 0) {
         		reportCurrentStatus(timePeriod);
         	}
@@ -124,11 +110,6 @@ public class GuReservationSimulator {
             System.out.printf("Remaining data allowance : %10.2f\n", OCS.getRemainingDataAllowance());
             
             timePeriod += 1;
-            
-//            if(timePeriod >= 50) {
-//            	System.out.println("Time period exceed 50");
-//            	break;
-//            }
         }
         
         
