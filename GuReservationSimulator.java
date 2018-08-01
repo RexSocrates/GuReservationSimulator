@@ -99,6 +99,7 @@ public class GuReservationSimulator {
         		
         		System.out.println("UE ID : " + ue.getUeID());
         		System.out.println("Consumed GU : " + consumedGU);
+        		System.out.println("");
         		
         		ue.completeSession(consumedGU, timePeriod);
         	}
@@ -408,13 +409,12 @@ public class GuReservationSimulator {
     	boolean chargingProcessContinue = true;
     	
     	/*
-    	if(remainingDataAllowance <= 0 && timePeriod > chargingPeriods * 24) {
+    	if(remainingDataAllowance <= 0 && timePeriod > chargingPeriods * 24 && getSumOfRemainingGuInUEs() <= 0) {
     		chargingProcessContinue = false;
     	}
     	*/
     	
-    	
-    	if(remainingDataAllowance <= 0 && timePeriod > chargingPeriods * 24 && getSumOfRemainingGuInUEs() <= 0) {
+    	if(timePeriod > chargingPeriods * 24) {
     		chargingProcessContinue = false;
     	}
     	
