@@ -457,6 +457,7 @@ public class GuReservationSimulator {
 			
 			double signals = device.getProducedSignals();
 			totalSignals += signals;
+			pw.printf("UE ID : %d", device.getUeID());
 			pw.printf("Signals : %3.0f\n", signals);
 			pw.printf("Session successful rate : %5.0f", device.getSuccessfulRate() * 100);
 			pw.println("%");
