@@ -135,6 +135,7 @@ public class GuReservationSimulator {
     	int[] cellIDs = new int[numOfDevices];
     	for(int i = 0; i < numOfDevices; i++) {
     		int cellID = (int)(Math.random() * 10001);
+    		System.out.println("++++++++++++++++++++");
     		
     		// check if the cell ID is in the array
     		boolean cellIdInTheList = false;
