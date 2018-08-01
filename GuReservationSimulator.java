@@ -224,7 +224,7 @@ public class GuReservationSimulator {
 		// remove title
 		inputFile.nextLine();
 		
-		int countDevice = 0;
+//		int countDevice = 0;
 		
 		while(inputFile.hasNext()) {
 			String tuple = inputFile.nextLine();
@@ -245,14 +245,14 @@ public class GuReservationSimulator {
 					System.out.println("Cell ID : " + cellID);
 					System.out.println("Time : " + time);
 					System.out.println("Total usage : " + totalUsage);
-					countDevice++;
+//					countDevice++;
 					break;
 				}
 			}
 			
-			if(countDevice >= UeArr.size()) {
-				break;
-			}
+//			if(countDevice >= UeArr.size()) {
+//				break;
+//			}
 		}
 		
 		inputFile.close();
@@ -281,7 +281,7 @@ public class GuReservationSimulator {
 		// remove title
 		inputFile.nextLine();
 		
-		int cellIdIndex = 0;
+//		int cellIdIndex = 0;
 		
 		while(inputFile.hasNext()) {
 			String singleTuple = inputFile.nextLine();
@@ -301,7 +301,7 @@ public class GuReservationSimulator {
 					totalUsageArr[i] = totalUsage;
 					
 					// count the number of devices whose data rate and total usage are filled
-					cellIdIndex += 1;
+//					cellIdIndex += 1;
 					
 					System.out.println("**************************");
 					System.out.println("Cell ID : " + cellID);
@@ -310,9 +310,9 @@ public class GuReservationSimulator {
 				}
 			}
 			
-			if(cellIdIndex >= cellIDs.length) {
-				break;
-			}
+//			if(cellIdIndex >= cellIDs.length) {
+//				break;
+//			}
 		}
 		
 		inputFile.close();
