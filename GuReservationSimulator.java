@@ -167,6 +167,11 @@ public class GuReservationSimulator {
     		}
     	}
     	
+    	
+    	for(int i = 0; i < cellIDs.length; i++) {
+    		System.out.println("Cell ID : " + cellIDs[i]);
+    	}
+    	
     	Arrays.sort(cellIDs);
     	
     	dataCollectionPeriods = 0;
