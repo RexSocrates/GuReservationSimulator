@@ -131,11 +131,11 @@ public class GuReservationSimulator {
     }
 
 	private static void initializeUserEquipments(int numOfDevices, int option) throws FileNotFoundException {
+		System.out.println("++++++++++++++++++++");
     	// randomly select the user equipment
     	int[] cellIDs = new int[numOfDevices];
     	for(int i = 0; i < numOfDevices; i++) {
     		int cellID = (int)(Math.random() * 10001);
-    		System.out.println("++++++++++++++++++++");
     		
     		// check if the cell ID is in the array
     		boolean cellIdInTheList = false;
