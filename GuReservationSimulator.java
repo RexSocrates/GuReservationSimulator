@@ -12,6 +12,7 @@ import java.io.PrintWriter;
 //import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Hashtable;
 
 /**
@@ -27,7 +28,7 @@ public class GuReservationSimulator {
     static double reportInterval = 1;
     static double dataCollectionPeriods = 1;
     static int[] cellIDs;
-    static String resultFileName = "";
+//    static String resultFileName = "";
 
     /**
      * @param args the command line arguments
@@ -35,9 +36,9 @@ public class GuReservationSimulator {
      */
     public static void main(String[] args) throws FileNotFoundException {
         // TODO code application logic here
-    	System.out.print("Enter result file name : ");
-    	resultFileName = input.next();
-    	System.out.println("");
+//    	System.out.print("Enter result file name : ");
+//    	resultFileName = input.next();
+//    	System.out.println("");
     	
 //        int numOfDevices = 3;
         System.out.print("Enter the number of devices : ");
@@ -64,6 +65,7 @@ public class GuReservationSimulator {
 //        double totalDataAllowance = input.nextDouble();
 //        System.out.println("");
         // total data allowance = 130(population of a cell) * 9(average data allowance of each person)
+        // stimulate that each cell has 35 GB data allowance in a week
         double totalDataAllowance = 35 * numOfDevices;
         
         switch(option) {
@@ -435,13 +437,16 @@ public class GuReservationSimulator {
     }
     
     private static void writeExperimentResult(int numOfDevices, String reservationScheme, double totalDataAllowance, double defaultGU) throws FileNotFoundException {
-//    	DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss");
-//    	LocalDate localDate = LocalDate.now();
-//    	String localDateStr = dtf.format(localDate) + ".txt";
+    	Date date = new Date();
+    	String dateStr = date.toString();
     	
-    	resultFileName = resultFileName + ".txt";
+    	String[] dateStrArr = dateStr.split(" ");
+    	String timeStr = dateStrArr[3].replaceAll(":", "_");
+    	String filename = dateStrArr[5] + dateStrArr[1] + dateStrArr[2] + "_" + timeStr;
     	
-    	PrintWriter pw = new PrintWriter(resultFileName);
+    	filename = filename + ".txt";
+    	
+    	PrintWriter pw = new PrintWriter(filename);
     	
     	double totalSignals = 0;
     	
