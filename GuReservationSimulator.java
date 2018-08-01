@@ -219,17 +219,14 @@ public class GuReservationSimulator {
 		// remove title
 		inputFile.nextLine();
 		
+		int countDevice = 0;
+		
 		while(inputFile.hasNext()) {
 			String tuple = inputFile.nextLine();
 			String[] tupleData = tuple.split(",");
 			int cellID = Integer.parseInt(tupleData[0]);
 			double time = Double.parseDouble(tupleData[1]);
 			double totalUsage = Double.parseDouble(tupleData[2]);
-			
-			System.out.println("==================================");
-			System.out.println("Cell ID : " + cellID);
-			System.out.println("Time : " + time);
-			System.out.println("Total usage : " + totalUsage);
 			
 			for(int i = 0; i < UeArr.size(); i++) {
 				UserEquipment ue = UeArr.get(i);
@@ -238,8 +235,18 @@ public class GuReservationSimulator {
 					DailyUsage ueDailyUsage = ue.getDailyUsage();
 					int intTime = (new Double(time)).intValue();
 					ueDailyUsage.addHourlyUsage(intTime, totalUsage);
+					
+					System.out.println("==================================");
+					System.out.println("Cell ID : " + cellID);
+					System.out.println("Time : " + time);
+					System.out.println("Total usage : " + totalUsage);
+					countDevice++;
 					break;
 				}
+			}
+			
+			if(countDevice >= UeArr.size()) {
+				break;
 			}
 		}
 		
@@ -281,14 +288,21 @@ public class GuReservationSimulator {
 			double periodicalDataUsage = Double.parseDouble(tupleData[2]);
 			double totalUsage = Double.parseDouble(tupleData[3]);
 			
-			System.out.println("**************************");
-			System.out.println("Cell ID : " + cellID);
-			System.out.println("Time : " + time);
-			
-			if(cellID == cellIDs[cellIdIndex] && time == dataCollectionPeriods) {
-				dataRate[cellIdIndex] = periodicalDataUsage;
-				totalUsageArr[cellIdIndex] = totalUsage;
-				cellIdIndex += 1;
+			for(int i = 0; i < cellIDs.length; i++) {
+				// compare cell ID
+				int currentCellID = cellIDs[i];
+				if(currentCellID == cellID && time == dataCollectionPeriods) {
+					dataRate[i] = periodicalDataUsage;
+					totalUsageArr[i] = totalUsage;
+					
+					// count the number of devices whose data rate and total usage are filled
+					cellIdIndex += 1;
+					
+					System.out.println("**************************");
+					System.out.println("Cell ID : " + cellID);
+					System.out.println("Time : " + time);
+					break;
+				}
 			}
 			
 			if(cellIdIndex >= cellIDs.length) {
