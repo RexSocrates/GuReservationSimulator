@@ -66,7 +66,7 @@ public class GuReservationSimulator {
 //        System.out.println("");
         // total data allowance = 130(population of a cell) * 9(average data allowance of each person)
         // stimulate that each cell has 35 GB data allowance in a week
-        double totalDataAllowance = 35 * numOfDevices;
+        double totalDataAllowance = 40 * numOfDevices;
         
         switch(option) {
             case 1 : OCS = fixedScheme(totalDataAllowance);
