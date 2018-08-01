@@ -64,7 +64,7 @@ public class GuReservationSimulator {
 //        double totalDataAllowance = input.nextDouble();
 //        System.out.println("");
         // total data allowance = 130(population of a cell) * 9(average data allowance of each person)
-        double totalDataAllowance = 130 * 9 * numOfDevices;
+        double totalDataAllowance = 35 * numOfDevices;
         
         switch(option) {
             case 1 : OCS = fixedScheme(totalDataAllowance);
@@ -332,7 +332,7 @@ public class GuReservationSimulator {
     	// hyper-parameters
         System.out.print("Enter the default GU(MB) for fixed scheme : ");
         defaultGU = input.nextDouble();
-        defaultGU = defaultGU * 130;
+//        defaultGU = defaultGU * 130;
         System.out.println("");
         
         
@@ -352,7 +352,7 @@ public class GuReservationSimulator {
     	// hyper-parameters
         System.out.print("Enter default GU(MB) for multiplicative scheme : ");
         defaultGU = input.nextDouble();
-        defaultGU = defaultGU * 130;
+//        defaultGU = defaultGU * 130;
         System.out.println("");
         
         System.out.print("Enter C : ");
@@ -381,7 +381,7 @@ public class GuReservationSimulator {
     	
 		System.out.print("Enter default GU(MB) for inventory-based reservation scheme : ");
 		defaultGU = input.nextDouble();
-		defaultGU = defaultGU * 130;
+//		defaultGU = defaultGU * 130;
 		System.out.println("");
 		
 //		System.out.print("Enter the signals of each report");
