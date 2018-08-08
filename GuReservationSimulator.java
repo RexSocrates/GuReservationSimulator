@@ -469,9 +469,9 @@ public class GuReservationSimulator {
 			pw.printf("Session successful rate : %5.0f", device.getSuccessfulRate() * 100);
 			pw.println("%");
 			
-			totalSucdcessfulRate += device.getSuccessfulRate();
+			totalSucdcessfulRate += device.getSuccessfulRate() * 100;
 		}
-		pw.printf("Average successful rate : %f", totalSucdcessfulRate);
+		pw.printf("Average successful rate : %f", (totalSucdcessfulRate / numOfDevices));
 		pw.println("%");
 		pw.printf("Total signals : %5.0f\n", totalSignals);
 		
