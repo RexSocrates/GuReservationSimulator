@@ -214,7 +214,7 @@ public class OnlineChargingFunctionInventoryBasedReservationScheme extends Onlin
 			optimalGuForUe = (double)this.optimalGUsHashtable.get(ueID);
 		}
 		
-		double insufficientGU = optimalGuForUe / sumOfEGUs * remainingDataAllowance;
+		double insufficientGU = Math.ceil(optimalGuForUe / sumOfEGUs) * remainingDataAllowance;
 		
 		return insufficientGU;
 	}
