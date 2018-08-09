@@ -456,6 +456,7 @@ public class GuReservationSimulator {
     	pw.printf("Reservation scheme : %s\n", reservationScheme);
     	pw.printf("Monthly data allowance : %3.0f\n", totalDataAllowance);
     	pw.printf("Default GU : %5.0f\n", defaultGU);
+    	pw.println("Data collection period : " + dataCollectionPeriods);
     	pw.println();
 		
     	double totalSucdcessfulRate = 0;
