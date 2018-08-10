@@ -154,7 +154,7 @@ public class GuReservationSimulator {
     	}
     	
     	// read cell IDs file
-    	File file = new File("cells/" + Integer.toString(numOfDevices));
+    	File file = new File("cells/" + Integer.toString(numOfDevices) + ".txt");
     	Scanner inputFile = new Scanner(file);
     	
     	int cellCount = 0;
