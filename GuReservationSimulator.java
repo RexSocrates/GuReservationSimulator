@@ -154,20 +154,20 @@ public class GuReservationSimulator {
 //    	}
     	
     	// read cell IDs file
-//    	File file = new File("cells/" + Integer.toString(numOfDevices) + ".txt");
-//    	Scanner inputFile = new Scanner(file);
-//    	
-//    	int cellCount = 0;
-//    	while(inputFile.hasNext()) {
-//    		cellIDs[cellCount++] = inputFile.nextInt();
-//    	}
-//    	
-//    	inputFile.close();
+    	File file = new File("cells/" + Integer.toString(numOfDevices) + ".txt");
+    	Scanner inputFile = new Scanner(file);
+    	
+    	int cellCount = 0;
+    	while(inputFile.hasNext()) {
+    		cellIDs[cellCount++] = inputFile.nextInt();
+    	}
+    	
+    	inputFile.close();
     	
     	// set the cell ID according to their order
-    	for(int i = 0; i < numOfDevices; i++) {
-    		cellIDs[i] = i + 1;
-    	}
+//    	for(int i = 0; i < numOfDevices; i++) {
+//    		cellIDs[i] = i + 1;
+//    	}
     	
     	
     	for(int i = 0; i < cellIDs.length; i++) {
