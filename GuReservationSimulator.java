@@ -135,28 +135,28 @@ public class GuReservationSimulator {
 		System.out.println("++++++++++++++++++++");
     	// randomly select the user equipment
     	int[] cellIDs = new int[numOfDevices];
-//    	for(int i = 0; i < numOfDevices; i++) {
-//    		int cellID = (int)(Math.random() * 10001);
-//    		
-//    		// check if the cell ID is in the array
-//    		boolean cellIdInTheList = false;
-//    		for(int j = 0; j < i; j++) {
-//    			if(cellIDs[i] == cellIDs[j]) {
-//    				cellIdInTheList = true;
-//    			}
-//    		}
-//    		
-//    		if(cellIdInTheList) {
-//    			i--;
-//    		}else {
-//    			cellIDs[i] = cellID;
-//    		}
-//    	}
+    	for(int i = 0; i < numOfDevices; i++) {
+    		int cellID = (int)(Math.random() * 10001);
+    		
+    		// check if the cell ID is in the array
+    		boolean cellIdInTheList = false;
+    		for(int j = 0; j < i; j++) {
+    			if(cellIDs[i] == cellIDs[j]) {
+    				cellIdInTheList = true;
+    			}
+    		}
+    		
+    		if(cellIdInTheList) {
+    			i--;
+    		}else {
+    			cellIDs[i] = cellID;
+    		}
+    	}
     	
     	// set the cell ID according to their order
-    	for(int i = 0; i < numOfDevices; i++) {
-    		cellIDs[i] = i + 1;
-    	}
+//    	for(int i = 0; i < numOfDevices; i++) {
+//    		cellIDs[i] = i + 1;
+//    	}
     	
     	
     	for(int i = 0; i < cellIDs.length; i++) {
@@ -451,6 +451,8 @@ public class GuReservationSimulator {
     	String timeStr = dateStrArr[3].replaceAll(":", "_");
     	String filename = dateStrArr[5] + dateStrArr[1] + dateStrArr[2] + "_" + timeStr;
     	
+    	String cellsFileName = filename + "_cells.txt";
+    	
     	filename = filename + ".txt";
     	
     	PrintWriter pw = new PrintWriter(filename);
@@ -481,6 +483,15 @@ public class GuReservationSimulator {
 		pw.printf("Average successful rate : %f", (totalSucdcessfulRate / numOfDevices));
 		pw.println("%");
 		pw.printf("Total signals : %5.0f\n", totalSignals);
+		
+		pw.close();
+		
+		// print cell IDs
+		pw = new PrintWriter(cellsFileName);
+		for(int i = 0; i < UeArr.size(); i++) {
+			UserEquipment ue = UeArr.get(i);
+			pw.println(ue.getUeID());
+		}
 		
 		pw.close();
     	
