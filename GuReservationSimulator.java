@@ -157,7 +157,7 @@ public class GuReservationSimulator {
     	System.out.print("Cell file name : ");
     	String cellFile = input.next();
     	
-    	File file = new File(cellFile);
+    	File file = new File("cells" + cellFile);
     	Scanner inputFile = new Scanner(file);
     	
     	int cellCount = 0;
@@ -501,13 +501,13 @@ public class GuReservationSimulator {
 		pw.close();
 		
 		// print cell IDs
-		pw = new PrintWriter(cellsFileName);
-		for(int i = 0; i < UeArr.size(); i++) {
-			UserEquipment ue = UeArr.get(i);
-			pw.println(ue.getUeID());
-		}
-		
-		pw.close();
+//		pw = new PrintWriter(cellsFileName);
+//		for(int i = 0; i < UeArr.size(); i++) {
+//			UserEquipment ue = UeArr.get(i);
+//			pw.println(ue.getUeID());
+//		}
+//		
+//		pw.close();
     	
 	}
     
