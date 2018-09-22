@@ -39,6 +39,7 @@ public class UserEquipment {
     boolean reportUeStatus;
     
     // IRS variables
+    String deviceType = "";
     // total demand per month, Unit : MB 
     double totalDemand;
     // periodical data usage
@@ -68,8 +69,9 @@ public class UserEquipment {
     }
     
     // constructor for IRS
-    public UserEquipment(int ID, OnlineChargingSystem OCS, double chargingPeriods, double dataCollectionPeriod, double reportInterval, double totalDemand, double periodicalDataUsage, String reservationScheme) {
+    public UserEquipment(int ID, String deviceType, OnlineChargingSystem OCS, double chargingPeriods, double dataCollectionPeriod, double reportInterval, double totalDemand, double periodicalDataUsage, String reservationScheme) {
     	this.ueID = ID;
+    	this.deviceType = deviceType;
         this.OCS = OCS;
         this.currentGU = 0;
         this.allocatedGUs = new ArrayList<Double>();
@@ -126,10 +128,6 @@ public class UserEquipment {
     	this.totalDemand = totalDemand;
     }
     
-    public double getPeriodicalDataUsage() {
-    	return this.periodicalDataUsage;
-    }
-    
     public void setPeriodicalDataUsage(double periodicalDataUsage) {
     	this.periodicalDataUsage = periodicalDataUsage;
     }
@@ -149,42 +147,28 @@ public class UserEquipment {
     
     
     // compute IRS variables
-    // compute periodical data usage rate
-    public double computePeriodicalDataUsage(double currentTime) {
-    	// formula : current total data usage / current time periods
-    	
-    	double totalGuConsumption = this.computeTotalGuConsumption();
-    	
-//    	System.out.printf("Total GU consumption : %f\n", totalGuConsumption);
-//    	System.out.printf("Current time period : %f\n", currentTime);
-    	
-    	// subtract the GU that haven't been used
-    	if(totalGuConsumption - this.currentGU >= 0) {
-    		totalGuConsumption = totalGuConsumption - this.currentGU;
+    // compute periodical data rate in previous hours
+    public double computePeriodicalDataRate(double currentTime, double dataCollectionPeriods) {
+    	double startTime = 1;
+    	if(currentTime > dataCollectionPeriods) {
+    		startTime = currentTime - dataCollectionPeriods;
     	}
     	
-    	return totalGuConsumption / currentTime;
+    	double totalUsageInDataCollectionPeriods = this.computeTotalGuConsumption(startTime, currentTime);
+    	
+    	double dataRate = totalUsageInDataCollectionPeriods / (currentTime - startTime);
+    	
+    	return dataRate;
     }
     
     // compute total GU consumption
-    public double computeTotalGuConsumption() {
-    	// get current total GU consumption
-    	double totalGuConsumption = 0;
-    	// compute previous periods' data usage
-    	for(int i = 0; i < this.periodAllocatedRecords.size(); i++) {
-    		SinglePeriodAllocatedGUs record = this.periodAllocatedRecords.get(i);
-    		
-    		totalGuConsumption += record.getSumOfGUs();
+    public double computeTotalGuConsumption(double startTime, double currentTime) {
+    	double totalUsageInDataCollectionPeriods = 0;
+    	for(int time = (int)startTime; time < (int)currentTime; time++) {
+    		totalUsageInDataCollectionPeriods += dailyUsage.getHourlyUsage(time);
     	}
     	
-    	// compute the GU consumption of current period
-    	for(int i = 0; i < this.allocatedGUs.size(); i++) {
-    		totalGuConsumption += this.allocatedGUs.get(i);
-    	}
-    	
-    	System.out.println("Total GU consumption : " + totalGuConsumption);
-    	
-    	return totalGuConsumption;
+    	return totalUsageInDataCollectionPeriods;
     }
     
     // Functions
@@ -192,29 +176,32 @@ public class UserEquipment {
     // return current status, including remaining GU of UE and the average data rate
     public Hashtable reportCurrentStatus(double currentTime) {
     	Hashtable<String, Double> hashtable = new Hashtable<String, Double>();
-    	
-//    	System.out.printf("UE ID : %d\n", this.ueID);
-//    	System.out.printf("Periodical data usage : %f\n", periodicalDataUsage);
-//    	System.out.printf("Remaining GU : %f\n", this.currentGU);
-    	
-    	// add the content of current status report
-    	hashtable.put("ueID", (double)this.ueID);
-    	hashtable.put("avgDataRate", this.getPeriodicalDataUsage());
-    	hashtable.put("totalDemand", this.getTotalDemand());
-    	hashtable.put("remainingGU", this.currentGU);
-    	
-//    	System.out.println("Periodical data usage : " + periodicalDataUsage);
-//    	System.out.println("Remaining GU : " + this.getCurrentGU());
-//    	System.out.println("==============================");
-    	
-    	// add the time period to tell the OCS that the current time
-    	hashtable.put("timePeriod", currentTime);
-    	
-    	// add the number of signals used by one report
-//    	System.out.printf("Report current status, UE ID : %d\n", this.ueID);
-    	this.producedSignals += 1;
-    	
-    	this.OCS.receiveCurrentStatusReport(hashtable);
+    	// only variable devices need to report their status
+    	if(this.deviceType.equals("Variable")) {
+        	
+//        	System.out.printf("UE ID : %d\n", this.ueID);
+//        	System.out.printf("Periodical data usage : %f\n", periodicalDataUsage);
+//        	System.out.printf("Remaining GU : %f\n", this.currentGU);
+        	
+        	// add the content of current status report
+        	hashtable.put("ueID", (double)this.ueID);
+        	hashtable.put("avgDataRate", this.computePeriodicalDataRate(currentTime, this.dataCollectionPeriod));
+        	hashtable.put("totalDemand", this.getTotalDemand());
+        	hashtable.put("remainingGU", this.currentGU);
+        	
+//        	System.out.println("Periodical data usage : " + periodicalDataUsage);
+//        	System.out.println("Remaining GU : " + this.getCurrentGU());
+//        	System.out.println("==============================");
+        	
+        	// add the time period to tell the OCS that the current time
+        	hashtable.put("timePeriod", currentTime);
+        	
+        	// add the number of signals used by one report
+//        	System.out.printf("Report current status, UE ID : %d\n", this.ueID);
+        	this.producedSignals += 1;
+        	
+        	this.OCS.receiveCurrentStatusReport(hashtable);
+    	}
     	
     	return hashtable;
     }

@@ -211,13 +211,13 @@ public class GuReservationSimulator {
 				UeArr.add(new UserEquipment(cellID, OCS, "MS"));
 			}else if(option == 3) {
 				// Inventory-based reservation scheme
-				UeArr.add(new UserEquipment(cellID, OCS, chargingPeriods, dataCollectionPeriods, reportInterval, totalDemands[i], dataUsages[i], "IRS"));
+				UeArr.add(new UserEquipment(cellID, "Regular", OCS, chargingPeriods, dataCollectionPeriods, reportInterval, totalDemands[i], dataUsages[i], "IRS"));
 			}
 		}
 	}
 
 	// File IO Functions
-	// read total usage from the file
+	// read quota usage in each time period from the file
 	private static void readTotalUsageFile() throws FileNotFoundException {
 		String fileName = "sevenDaysRecords.csv";
 		File file = new File(fileName);
@@ -321,7 +321,7 @@ public class GuReservationSimulator {
 		
 	}
 	
-	// Devices report current status
+	// Devices report current status, only dynamic devices report current status
 	private static void reportCurrentStatus(double currentTime){
 		for(int i = 0; i < UeArr.size(); i++) {
 			UserEquipment ue = UeArr.get(i);
