@@ -132,6 +132,10 @@ public class UserEquipment {
     	this.periodicalDataUsage = periodicalDataUsage;
     }
     
+    public double getPeriodicalDataUsage() {
+    	return this.periodicalDataUsage;
+    }
+    
     public double getSuccessfulRate() {
     	double successfulTimes = this.numberOfSessions - this.sessionFailedTimes;
     	return successfulTimes / this.numberOfSessions;

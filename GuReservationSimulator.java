@@ -91,6 +91,9 @@ public class GuReservationSimulator {
         double timePeriod = 0;
         reportCurrentStatus(timePeriod++);
 //        int loopCount = 0;
+        
+        setTotalDemandAndDataRate();
+        
         while(chargingProcessContinue(OCS.getRemainingDataAllowance(), timePeriod)) {
         	System.out.println("Time period : " + timePeriod);
         	for(int i = 0; i < UeArr.size(); i++) {
@@ -507,5 +510,18 @@ public class GuReservationSimulator {
 //		pw.close();
     	
 	}
+    
+    // 傳送所有 UE 的總需求以及data rate 到 OCS
+    public static void setTotalDemandAndDataRate() {
+    	for(int i = 0; i < UeArr.size(); i++) {
+    		UserEquipment ue = UeArr.get(i);
+    		
+    		int ueID = ue.getUeID();
+    		double totalDemand = ue.getTotalDemand();
+    		double dataRate = ue.getPeriodicalDataUsage();
+    		
+    		OCS.setTotalDemandAndDataRate(ueID, totalDemand, dataRate);
+    	}
+    }
     
 }

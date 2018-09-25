@@ -183,8 +183,14 @@ public class OnlineChargingSystem {
     		
     		IRSOCF.receiveStatusReport(ueID, avgDataRate, remainingGU, totalDemand, currentTimePeriod);
     	}
-    	
-    	
-    	
     }
+    
+    // receive total demand and periodical data usage
+    public void setTotalDemandAndDataRate(int ueID, double totalDemand, double dataRate) {
+    	if(this.reservationSchemeName.equals("IRS")) {
+    		OnlineChargingFunctionInventoryBasedReservationScheme IRSOCF = (OnlineChargingFunctionInventoryBasedReservationScheme)this.getOCF();
+    		IRSOCF.storeDemandInfo(ueID, totalDemand, dataRate);
+    	}
+    }
+    
 }
