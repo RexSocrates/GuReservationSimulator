@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Hashtable;
+import java.util.Random;
 
 /**
  *
@@ -66,7 +67,9 @@ public class GuReservationSimulator {
 //        System.out.println("");
         // total data allowance = 130(population of a cell) * 9(average data allowance of each person)
         // stimulate that each cell has 35 GB data allowance in a week
-        double totalDataAllowance = 130 * 2.5 * numOfDevices;
+//        double totalDataAllowance = 130 * 2.5 * numOfDevices;
+        
+        double totalDataAllowance = dataAllowanceSetting(numOfDevices);
         
         switch(option) {
             case 1 : OCS = fixedScheme(totalDataAllowance);
@@ -156,7 +159,7 @@ public class GuReservationSimulator {
 //    		}
 //    	}
     	
-    	// read cell IDs file
+    	// read IDs file, which contains the randomly selected ID
     	File file = new File("cells/" + Integer.toString(numOfDevices) + ".txt");
     	Scanner inputFile = new Scanner(file);
     	
@@ -222,7 +225,7 @@ public class GuReservationSimulator {
 	// File IO Functions
 	// read quota usage in each time period from the file
 	private static void readTotalUsageFile() throws FileNotFoundException {
-		String fileName = "sevenDaysRecords.csv";
+		String fileName = "newSevenDaysRecord.csv";
 		File file = new File(fileName);
 		Scanner inputFile = new Scanner(file);
 		
@@ -277,8 +280,8 @@ public class GuReservationSimulator {
 	}
 	
 	// read periodical data rate and total usage
-	private static void readDataRateFile(int[] cellIDs, double[] dataRate, double[] totalUsageArr) throws FileNotFoundException {
-		String fileName = "accumulatedTotalUsage.csv";
+	private static void readDataRateFile(int[] cellIDs, double[] dataRates, double[] totalUsageArr) throws FileNotFoundException {
+		String fileName = "dividedAccumulatedTotalUsage.csv";
 		
 		File file = new File(fileName);
 		Scanner inputFile = new Scanner(file);
@@ -293,24 +296,22 @@ public class GuReservationSimulator {
 			
 			// split a tuple
 			String[] tupleData = singleTuple.split(",");
-			int cellID = Integer.parseInt(tupleData[0]);
-			double time = Double.parseDouble(tupleData[1]);
-			double periodicalDataUsage = Double.parseDouble(tupleData[2]);
-			double totalUsage = Double.parseDouble(tupleData[3]);
+			int ID = Integer.parseInt(tupleData[0]);
+			double periodicalDataUsage = Double.parseDouble(tupleData[1]);
+			double totalUsage = Double.parseDouble(tupleData[2]);
 			
 			for(int i = 0; i < cellIDs.length; i++) {
 				// compare cell ID
 				int currentCellID = cellIDs[i];
-				if(currentCellID == cellID && time == dataCollectionPeriods) {
-					dataRate[i] = periodicalDataUsage;
+				if(currentCellID == ID) {
+					dataRates[i] = periodicalDataUsage;
 					totalUsageArr[i] = totalUsage;
 					
 					// count the number of devices whose data rate and total usage are filled
 //					cellIdIndex += 1;
 					
 					System.out.println("**************************");
-					System.out.println("Cell ID : " + cellID);
-					System.out.println("Time : " + time);
+					System.out.println("Cell ID : " + ID);
 					break;
 				}
 			}
@@ -347,6 +348,36 @@ public class GuReservationSimulator {
 		}
 		System.out.printf("Total signals : %5.0f\n", totalSignals);
 		
+	}
+	
+	// set the total data allowance with normal distribution
+	private static double dataAllowanceSetting(int numOfDevices) {
+		// store the data allowance of data plans in an array
+		double[] dataAllowanceArr = {500, 1024, 3072, 5120};
+		
+		int numberOfDataPlans = dataAllowanceArr.length;
+		double normalDistributionLowerBound = -4;
+		double normalDistributionUpperBound = 4;
+		
+		double intervalRange = (normalDistributionUpperBound - normalDistributionLowerBound) / numberOfDataPlans;
+		
+		int[] dataPlanUserCountArr = new int[numberOfDataPlans];
+		Random rand = new Random();
+		for(int i = 0; i < numOfDevices; i++) {
+			double randNum = rand.nextGaussian();
+			
+			int interval = (int)(Math.floor((randNum - normalDistributionLowerBound) / intervalRange));
+			dataPlanUserCountArr[interval] += 1;
+		}
+		
+		// aggregate the total allowance
+		double totalDataAllowance = 0;
+		for(int i = 0; i < dataAllowanceArr.length; i++) {
+			totalDataAllowance += dataAllowanceArr[i] * dataPlanUserCountArr[i];
+		}
+		
+		// change monthly allowance to weekly allowance
+		return totalDataAllowance / 4;
 	}
 	
 

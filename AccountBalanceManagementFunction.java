@@ -16,8 +16,8 @@ public class AccountBalanceManagementFunction {
     
     public AccountBalanceManagementFunction(double totalDataAllowance) {
         // transfer GB to MB
-        this.totalDataAllowance = totalDataAllowance * 1024;
-        this.remainingDataAllowance = totalDataAllowance * 1024;
+        this.totalDataAllowance = totalDataAllowance;
+        this.remainingDataAllowance = totalDataAllowance;
     }
 
     public double getTotalDataAllowance() {
