@@ -160,20 +160,20 @@ public class GuReservationSimulator {
 //    	}
     	
     	// read IDs file, which contains the randomly selected ID
-    	File file = new File("cells/" + Integer.toString(numOfDevices) + ".txt");
-    	Scanner inputFile = new Scanner(file);
-    	
-    	int cellCount = 0;
-    	while(inputFile.hasNext()) {
-    		cellIDs[cellCount++] = inputFile.nextInt();
-    	}
-    	
-    	inputFile.close();
-    	
-    	// set the cell ID according to their order
-//    	for(int i = 0; i < numOfDevices; i++) {
-//    		cellIDs[i] = i + 1;
+//    	File file = new File("cells/" + Integer.toString(numOfDevices) + ".txt");
+//    	Scanner inputFile = new Scanner(file);
+//    	
+//    	int cellCount = 0;
+//    	while(inputFile.hasNext()) {
+//    		cellIDs[cellCount++] = inputFile.nextInt();
 //    	}
+//    	
+//    	inputFile.close();
+    	
+    	// verify the program logic, set the selected IDs
+    	for(int i = 0; i < cellIDs.length; i++) {
+    		cellIDs[i] = i + 1;
+    	}
     	
     	
     	for(int i = 0; i < cellIDs.length; i++) {
@@ -225,7 +225,7 @@ public class GuReservationSimulator {
 	// File IO Functions
 	// read quota usage in each time period from the file
 	private static void readTotalUsageFile() throws FileNotFoundException {
-		String fileName = "newSevenDaysRecord.csv";
+		String fileName = "usage_01.csv";
 		File file = new File(fileName);
 		Scanner inputFile = new Scanner(file);
 		
@@ -281,7 +281,7 @@ public class GuReservationSimulator {
 	
 	// read periodical data rate and total usage
 	private static void readDataRateFile(int[] cellIDs, double[] dataRates, double[] totalUsageArr) throws FileNotFoundException {
-		String fileName = "dividedAccumulatedTotalUsage.csv";
+		String fileName = "statistic_01.csv";
 		
 		File file = new File(fileName);
 		Scanner inputFile = new Scanner(file);
@@ -377,7 +377,8 @@ public class GuReservationSimulator {
 		}
 		
 		// change monthly allowance to weekly allowance
-		return totalDataAllowance / 4;
+//		return totalDataAllowance / 4;
+		return 40;
 	}
 	
 
@@ -410,7 +411,7 @@ public class GuReservationSimulator {
         System.out.println("");
         
         System.out.print("Enter C : ");
-        double c = input.nextInt();
+        double c = input.nextDouble();
         System.out.println("");
         
         // configure online charging function for multiplicative scheme
@@ -518,7 +519,7 @@ public class GuReservationSimulator {
 			
 			double signals = device.getProducedSignals();
 			totalSignals += signals;
-			pw.printf("UE ID : %d", device.getUeID());
+			pw.printf("UE ID : %5d ", device.getUeID());
 			pw.printf("Signals : %3.0f\n", signals);
 			pw.printf("Session successful rate : %5.0f", device.getSuccessfulRate() * 100);
 			pw.println("%");

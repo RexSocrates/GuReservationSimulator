@@ -35,7 +35,7 @@ public class OnlineChargingFunctionInventoryBasedReservationScheme extends Onlin
 	
 	
 	
-	
+	// constructor
 	public OnlineChargingFunctionInventoryBasedReservationScheme(double defaultGu, double chargingPeriods, double signalsPerReport, double signalsPerOrder) {
 		super(defaultGu, chargingPeriods, "IRS");
 		this.R = signalsPerReport;
@@ -90,14 +90,12 @@ public class OnlineChargingFunctionInventoryBasedReservationScheme extends Onlin
 		System.out.println("Put Reporting time : " + currentTimePeriod);
 		System.out.println("Charging periods : " + this.chargingPeriods);
 		*/
-	}
-	
-	
+	}	
 	
 	// get latest reporting time
 	public double getLatestReportingTime(int ueID) {
 		// return 0 if there is no record of latest reporting time
-		double latestReportingTime = 0;
+		double latestReportingTime = 1;
 		if(this.reportingTime.containsKey(ueID)) {
 			latestReportingTime = (double)this.reportingTime.get(ueID);
 		}
@@ -179,25 +177,7 @@ public class OnlineChargingFunctionInventoryBasedReservationScheme extends Onlin
 		return egu;
 	}
 	
-	// get sum of EGU of variable devices
-	public double getSumOfEGUs() {
-		double sumOfEGUs = 0;
-		
-		// get the IDs in hash table
-		int[] ueIDs = this.getKeys();
-//		System.out.println("Get Sum of EGUs length : " + ueIDs.length);
-		
-		for(int i = 0; i < ueIDs.length; i++) {
-			int ueID = ueIDs[i];
-			double ueIdEGU = this.getEgu(ueID);
-			sumOfEGUs += ueIdEGU;
-//			System.out.printf("UE ID : %d\nEGU : %f\n", ueID, ueIdEGU);
-		}
-		
-		return sumOfEGUs;
-	}
-	
-	// get all the keys in the hash table, to calculate the sum of EGU
+	// get all the keys(UE IDs) in the hash table, to calculate the sum of EGU
 	public int[] getKeys() {
 		// get the set of the keys in hash table
 		Object[] keys = this.reportingTime.keySet().toArray();
@@ -227,6 +207,7 @@ public class OnlineChargingFunctionInventoryBasedReservationScheme extends Onlin
 	
 	// 取得指定 UE 的 GU 以及其他裝置的 EGU 總和
 	public double getSumOfEguAndGuOf(int ueID) {
+		/*
 		double optimalGuForUe = this.defaultGU;
 		if(this.optimalGUsHashtable.containsKey(ueID)) {
 			optimalGuForUe = (double)this.optimalGUsHashtable.get(ueID);
@@ -250,11 +231,31 @@ public class OnlineChargingFunctionInventoryBasedReservationScheme extends Onlin
 //		System.out.println("===================================");
 		
 		double totalValue = optimalGuForUe + sumOfEguExceptUe;
+		*/
 		
-		return totalValue;
+		double optimalGuForUe = 0;
+		if(this.optimalGUsHashtable.containsKey(ueID)) {
+			optimalGuForUe = (double)this.optimalGUsHashtable.get(ueID);
+		}
+		
+		int[] ueIDs = this.getKeys();
+		// compute sum of EGU of regular devices
+		double sumOfOtherEGU = 0;
+		for(int i = 0; i < ueIDs.length; i++) {
+			int currentUeID = ueIDs[i];
+			if(currentUeID != ueID) {
+				if(this.optimalGUsHashtable.containsKey(currentUeID)) {
+					// only the IDs of regular devices are contained in the optimal GU hash table
+					double optimalGU = (double)this.optimalGUsHashtable.get(currentUeID);
+					sumOfOtherEGU += optimalGU;
+				}
+			}
+		}
+		
+		return optimalGuForUe + sumOfOtherEGU;
 	}
 
-
+	
 	@Override
 	public double determineGU(Hashtable hashtable) {
 		int ueID = ((Double)hashtable.get("UEID")).intValue();
