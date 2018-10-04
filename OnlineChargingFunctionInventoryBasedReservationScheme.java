@@ -63,7 +63,7 @@ public class OnlineChargingFunctionInventoryBasedReservationScheme extends Onlin
 	
 	// compute the optimal size of granted unit for each user equipment
 	public double getOptimalGU(double estiTotalDemand, double periodicalDataUsage) {
-		return Math.sqrt(estiTotalDemand * this.S * periodicalDataUsage / this.R);
+		return Math.floor(Math.sqrt(estiTotalDemand * this.S * periodicalDataUsage / this.R));
 	}
 	
 	// update optimal GU(Q) for each user equipment
@@ -180,7 +180,7 @@ public class OnlineChargingFunctionInventoryBasedReservationScheme extends Onlin
 	// get all the keys(UE IDs) in the hash table, to calculate the sum of EGU
 	public int[] getKeys() {
 		// get the set of the keys in hash table
-		Object[] keys = this.reportingTime.keySet().toArray();
+		Object[] keys = this.optimalGUsHashtable.keySet().toArray();
 		
 		// declare an array to store those keys
 		int[] IDs = new int[keys.length];
@@ -200,7 +200,10 @@ public class OnlineChargingFunctionInventoryBasedReservationScheme extends Onlin
 			optimalGuForUe = (double)this.optimalGUsHashtable.get(ueID);
 		}
 		
-		double insufficientGU = Math.ceil(optimalGuForUe / sumOfEGUs) * remainingDataAllowance;
+		double insufficientGU = Math.floor(optimalGuForUe / sumOfEGUs * remainingDataAllowance);
+		if(insufficientGU == 0) {
+			insufficientGU = 1;
+		}
 		
 		return insufficientGU;
 	}
@@ -289,6 +292,9 @@ public class OnlineChargingFunctionInventoryBasedReservationScheme extends Onlin
 		System.out.println("RD : " + remainingDataAllowance);
 		System.out.println("Reserved GU : " + reservedGU);
 		*/
+		
+		System.out.println("UE ID : " + ueID);
+		System.out.println("Reserved GU : " + reservedGU);
 		
 		return reservedGU;
 	}
