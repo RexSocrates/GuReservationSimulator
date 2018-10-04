@@ -8,7 +8,7 @@ public class OnlineChargingFunctionReservationScheme implements ReservationSchem
 	
 	public OnlineChargingFunctionReservationScheme(double defaultGU, double chargingPeriods, String reservationScheme) {
 		this.defaultGU = defaultGU;
-		this.chargingPeriods = chargingPeriods * 24;
+		this.chargingPeriods = chargingPeriods;
 		this.reservationScheme = reservationScheme;
 	}
 

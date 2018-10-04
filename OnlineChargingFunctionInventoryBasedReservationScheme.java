@@ -129,7 +129,7 @@ public class OnlineChargingFunctionInventoryBasedReservationScheme extends Onlin
 		return validTime;
 	}
 	
-	// compute the expected GU for UE to complete its cycle
+	// compute the expected GU for UE to complete its cycle. Formula 7
 	public double getCompleteCycleExpectedGU(int ueID) {
 		// formula : (valid time or cycle time - latest reporting time) * average data rate
 		double validTime = this.computeValidTime(ueID);
@@ -141,7 +141,7 @@ public class OnlineChargingFunctionInventoryBasedReservationScheme extends Onlin
 			avgDataRate = (double)this.dataUsageHashtable.get(ueID);
 		}
 		
-		return (validTime - latestReportingTime) * avgDataRate;
+		return Math.ceil((validTime - latestReportingTime) * avgDataRate);
 	}
 	
 	// calculating EGU
@@ -170,6 +170,8 @@ public class OnlineChargingFunctionInventoryBasedReservationScheme extends Onlin
 				egu = (double)this.optimalGUsHashtable.get(ueID);
 			}
 		}
+		
+		egu = Math.ceil(egu);
 		
 		// put the value in hash table
 		this.EGUsHashtable.put(ueID, egu);
@@ -248,9 +250,8 @@ public class OnlineChargingFunctionInventoryBasedReservationScheme extends Onlin
 			int currentUeID = ueIDs[i];
 			if(currentUeID != ueID) {
 				if(this.optimalGUsHashtable.containsKey(currentUeID)) {
-					// only the IDs of regular devices are contained in the optimal GU hash table
-					double optimalGU = (double)this.optimalGUsHashtable.get(currentUeID);
-					sumOfOtherEGU += optimalGU;
+					double EGU = this.getEgu(currentUeID);
+					sumOfOtherEGU += EGU;
 				}
 			}
 		}
@@ -292,9 +293,6 @@ public class OnlineChargingFunctionInventoryBasedReservationScheme extends Onlin
 		System.out.println("RD : " + remainingDataAllowance);
 		System.out.println("Reserved GU : " + reservedGU);
 		*/
-		
-		System.out.println("UE ID : " + ueID);
-		System.out.println("Reserved GU : " + reservedGU);
 		
 		return reservedGU;
 	}

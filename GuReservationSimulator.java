@@ -25,7 +25,8 @@ public class GuReservationSimulator {
     static ArrayList<UserEquipment> UeArr = new ArrayList<UserEquipment>();
     static OnlineChargingSystem OCS;
     static double defaultGU = 0;
-    static double chargingPeriods = 7;
+    // count by hours
+    static double chargingPeriods = 5;
     static double reportInterval = 1;
     static double dataCollectionPeriods = 1;
     static int[] cellIDs;
@@ -469,7 +470,7 @@ public class GuReservationSimulator {
     	}
     	*/
     	
-    	if(timePeriod > chargingPeriods * 24) {
+    	if(timePeriod > chargingPeriods) {
     		chargingProcessContinue = false;
     	}
     	

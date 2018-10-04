@@ -83,7 +83,7 @@ public class UserEquipment {
         this.periodicalDataUsage = periodicalDataUsage;
         
     	// change days to hours
-    	this.chargingPeriods = chargingPeriods * 24;
+    	this.chargingPeriods = chargingPeriods;
     	this.dataCollectionPeriod = dataCollectionPeriod;
     	this.reportInterval = reportInterval;
     	
@@ -181,7 +181,7 @@ public class UserEquipment {
     public Hashtable reportCurrentStatus(double currentTime) {
     	Hashtable<String, Double> hashtable = new Hashtable<String, Double>();
     	// only variable devices need to report their status
-    	if(this.deviceType.equals("Variable")) {
+    	if(needToReport(currentTime)) {
         	
 //        	System.out.printf("UE ID : %d\n", this.ueID);
 //        	System.out.printf("Periodical data usage : %f\n", periodicalDataUsage);
@@ -189,8 +189,8 @@ public class UserEquipment {
         	
         	// add the content of current status report
         	hashtable.put("ueID", (double)this.ueID);
-        	hashtable.put("avgDataRate", this.computePeriodicalDataRate(currentTime, this.dataCollectionPeriod));
-        	hashtable.put("totalDemand", this.getTotalDemand());
+        	hashtable.put("avgDataRate", this.periodicalDataUsage);
+        	hashtable.put("totalDemand", this.totalDemand);
         	hashtable.put("remainingGU", this.currentGU);
         	
 //        	System.out.println("Periodical data usage : " + periodicalDataUsage);
@@ -208,6 +208,16 @@ public class UserEquipment {
     	}
     	
     	return hashtable;
+    }
+    
+    // to determine whether to report current status
+    public boolean needToReport(double currentTime) {
+    	boolean report = false;
+    	
+    	if(this.getCurrentGU() > 0 || currentTime == 1) {
+    		report = true;
+    	}
+    	return report;
     }
     
     // to complete a session, giving a granted unit that a session needs and the time that the session created
