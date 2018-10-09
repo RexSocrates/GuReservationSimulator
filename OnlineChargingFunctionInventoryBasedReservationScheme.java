@@ -203,7 +203,7 @@ public class OnlineChargingFunctionInventoryBasedReservationScheme extends Onlin
 		}
 		
 		double insufficientGU = Math.floor(optimalGuForUe / sumOfEGUs * remainingDataAllowance);
-		if(insufficientGU == 0) {
+		if(insufficientGU == 0 && remainingDataAllowance  >= 1) {
 			insufficientGU = 1;
 		}
 		
