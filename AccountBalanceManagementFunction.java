@@ -10,7 +10,7 @@
  * @author Socrates
  */
 public class AccountBalanceManagementFunction {
-    // 單位 : GB
+    // 單位 : MB
     private double totalDataAllowance;
     private double remainingDataAllowance;
     

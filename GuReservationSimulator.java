@@ -378,8 +378,7 @@ public class GuReservationSimulator {
 		}
 		
 		// change monthly allowance to weekly allowance
-//		return totalDataAllowance / 4;
-		return 40;
+		return totalDataAllowance / 4;
 	}
 	
 
@@ -399,7 +398,7 @@ public class GuReservationSimulator {
         AccountBalanceManagementFunction ABMF = new AccountBalanceManagementFunction(totalDataAllowance);
         
         // create an instance for online charging system
-        OnlineChargingSystem OCS = new OnlineChargingSystem(OCF, ABMF, "FS");
+        OnlineChargingSystem OCS = new OnlineChargingSystem(UeArr, OCF, ABMF, "FS");
         
         return OCS;
     }
@@ -420,7 +419,7 @@ public class GuReservationSimulator {
         // configure account balance management function
         AccountBalanceManagementFunction ABMF = new AccountBalanceManagementFunction(totalDataAllowance);
         
-        OnlineChargingSystem OCS = new OnlineChargingSystem(OCF, ABMF, "MS");
+        OnlineChargingSystem OCS = new OnlineChargingSystem(UeArr, OCF, ABMF, "MS");
         
         return OCS;
         
@@ -458,7 +457,7 @@ public class GuReservationSimulator {
 		AccountBalanceManagementFunction ABMF = new AccountBalanceManagementFunction(totalDataAllowance);
     	
     	
-		return new OnlineChargingSystem(OCF, ABMF, "IRS");
+		return new OnlineChargingSystem(UeArr, OCF, ABMF, "IRS");
 	}
     
     private static boolean chargingProcessContinue(double remainingDataAllowance, double timePeriod) {
@@ -555,6 +554,12 @@ public class GuReservationSimulator {
     		
     		OCS.setTotalDemandAndDataRate(ueID, totalDemand, dataRate);
     	}
+    }
+    
+    
+    // call back remaining GU of each devices
+    public static void callBack() {
+    	
     }
     
 }

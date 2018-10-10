@@ -1,3 +1,4 @@
+
 import java.util.Hashtable;
 import java.util.Set;
 
@@ -196,48 +197,55 @@ public class OnlineChargingFunctionInventoryBasedReservationScheme extends Onlin
 	}
 	
 	// get GU for the device when the remaining data allowance is not enough
-	public double getSurplusGu(int ueID, double sumOfEGUs, double remainingDataAllowance) {
+	public Hashtable getSurplusGu(Hashtable hashtable) {
+		int ueID = ((Double)hashtable.get("UEID")).intValue();
+		double remainingDataAllowance = (double)hashtable.get("remainingDataAllowance");
+		
 		double optimalGuForUe = this.defaultGU;
 		if(this.optimalGUsHashtable.containsKey(ueID)) {
 			optimalGuForUe = (double)this.optimalGUsHashtable.get(ueID);
 		}
 		
+		double sumOfEGUs = this.getSumOfEguAndGuOf(ueID);
+		
 		double insufficientGU = Math.floor(optimalGuForUe / sumOfEGUs * remainingDataAllowance);
+		
 		if(insufficientGU == 0 && remainingDataAllowance  >= 1) {
 			insufficientGU = 1;
 		}
 		
-		return insufficientGU;
+		// update last reservation time
+		double timePeriod = 1;
+		if(hashtable.containsKey("timePeriod")) {
+			timePeriod = (double)hashtable.get("timePeriod");
+		}
+		
+		int[] ueIDs = this.getKeys();
+		
+		Hashtable<Integer, Double> insufficientGUs = new Hashtable<Integer, Double>();
+		// compute the surplus GU for each device
+		for(int i = 0; i < ueIDs.length; i++) {
+			int ID = ueIDs[i];
+			double currentOptimalGU = this.defaultGU;
+			if(this.optimalGUsHashtable.containsKey(ID)) {
+				currentOptimalGU = (double)this.optimalGUsHashtable.get(ID);
+			}
+			
+			double reservedGU = Math.floor(currentOptimalGU / sumOfEGUs * remainingDataAllowance);
+			if(reservedGU == 0 && remainingDataAllowance >= ueIDs.length) {
+				reservedGU = 1;
+			}
+			
+			insufficientGUs.put(ID, reservedGU);
+			
+			this.lastReservationTime.put(ID, timePeriod);
+		}
+		
+		return insufficientGUs;
 	}
 	
 	// 取得指定 UE 的 GU 以及其他裝置的 EGU 總和
 	public double getSumOfEguAndGuOf(int ueID) {
-		/*
-		double optimalGuForUe = this.defaultGU;
-		if(this.optimalGUsHashtable.containsKey(ueID)) {
-			optimalGuForUe = (double)this.optimalGUsHashtable.get(ueID);
-		}
-		
-//		System.out.println("===================================");
-//		System.out.println("UE ID : " + ueID);
-//		System.out.printf("Optimal GU reserved for UE : %f\n", optimalGuForUe);
-		
-		int[] ueIDs = this.getKeys();
-		double sumOfEguExceptUe = 0;
-		for(int i = 0; i < ueIDs.length; i++) {
-			int currentUeID = ueIDs[i];
-			if(currentUeID != ueID) {
-				double egu = this.getEgu(currentUeID);
-				sumOfEguExceptUe += egu;
-				System.out.println("Other's UE ID : " + currentUeID);
-				System.out.println("EGU : " + egu);
-			}
-		}
-//		System.out.println("===================================");
-		
-		double totalValue = optimalGuForUe + sumOfEguExceptUe;
-		*/
-		
 		double optimalGuForUe = 0;
 		if(this.optimalGUsHashtable.containsKey(ueID)) {
 			optimalGuForUe = (double)this.optimalGUsHashtable.get(ueID);
@@ -264,18 +272,14 @@ public class OnlineChargingFunctionInventoryBasedReservationScheme extends Onlin
 	public double determineGU(Hashtable hashtable) {
 		int ueID = ((Double)hashtable.get("UEID")).intValue();
 		
-		double sumOfEGUs = this.getSumOfEguAndGuOf(ueID);
-		double remainingDataAllowance = (double)hashtable.get("remainingDataAllowance");
+//		double sumOfEGUs = this.getSumOfEguAndGuOf(ueID);
+//		double remainingDataAllowance = (double)hashtable.get("remainingDataAllowance");
 		
 		double reservedGU = this.defaultGU;
 		// if the sum of EGUs <= remaining data allowance, then allocate the optimal granted unit for the device
-		if(sumOfEGUs <= remainingDataAllowance) {
-			if(this.optimalGUsHashtable.containsKey(ueID)) {
-				reservedGU = (double)this.optimalGUsHashtable.get(ueID);
-			}
-		}else {
-			reservedGU = this.getSurplusGu(ueID, sumOfEGUs, remainingDataAllowance);
-			hashtable.put("dataAllowanceNotEnough", 1);
+		
+		if(this.optimalGUsHashtable.containsKey(ueID)) {
+			reservedGU = (double)this.optimalGUsHashtable.get(ueID);
 		}
 		
 		// update last reservation time
@@ -295,6 +299,21 @@ public class OnlineChargingFunctionInventoryBasedReservationScheme extends Onlin
 		*/
 		
 		return reservedGU;
+	}
+	
+	// get surplus GU condition
+	public boolean getSurplusGuCondition(Hashtable hashtable) {
+		int ueID = ((Double)hashtable.get("UEID")).intValue();
+		
+		double sumOfEgu = getSumOfEguAndGuOf(ueID);
+		double remainingDataAllowance = (double)hashtable.get("remainingDataAllowance");
+		
+		boolean getSurplusGU = false;
+		if(sumOfEgu > remainingDataAllowance) {
+			hashtable.put("dataAllowanceNotEnough", 1);
+			getSurplusGU = true;
+		}
+		return getSurplusGU;
 	}
 	
 	// store total demand and data rate of each device in hash table

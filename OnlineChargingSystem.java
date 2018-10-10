@@ -6,18 +6,21 @@
 
 
 import java.util.Hashtable;
+import java.util.ArrayList;
 
 /**
  *
  * @author Socrates
  */
 public class OnlineChargingSystem {
+	ArrayList<UserEquipment> UeArr;
     private OnlineChargingFunctionReservationScheme OCF;
     private AccountBalanceManagementFunction ABMF;
     String reservationSchemeName = "";
     
-    public OnlineChargingSystem(OnlineChargingFunctionReservationScheme OCF, AccountBalanceManagementFunction ABMF, String reservationSchemeName) {
-        this.OCF = OCF;
+    public OnlineChargingSystem(ArrayList<UserEquipment> ueArr, OnlineChargingFunctionReservationScheme OCF, AccountBalanceManagementFunction ABMF, String reservationSchemeName) {
+        this.UeArr = ueArr;
+    	this.OCF = OCF;
         this.ABMF = ABMF;
         this.reservationSchemeName = reservationSchemeName;
     }
@@ -59,7 +62,34 @@ public class OnlineChargingSystem {
         // compute the reserved granted unit
         double remainingBalance = this.ABMF.getRemainingDataAllowance();
         hashtable.put("remainingDataAllowance", remainingBalance);
-        double reservedGU = this.determineGU(hashtable);
+        
+        
+        double reservedGU = 0;
+        if(this.reservationSchemeName.equals("IRS")) {
+        	OnlineChargingFunctionInventoryBasedReservationScheme IRSOCF = (OnlineChargingFunctionInventoryBasedReservationScheme)this.getOCF();
+        	if(IRSOCF.getSurplusGuCondition(hashtable)) {
+        		// before calculate the GU, the remaining GU of devices should be called back.
+        		this.callBack();
+        		
+        		remainingBalance = this.ABMF.getRemainingDataAllowance();
+        		hashtable.put("remainingDataAllowance", remainingBalance);
+        		
+        		// re-allocate GU, an array of allocated GUs should be return
+        		Hashtable reservedGUs = IRSOCF.getSurplusGu(hashtable);
+        		
+        		// get the reserved GU for this UE
+        		int currentUID = (int)hashtable.get("UEID");
+        		reservedGU = (double)reservedGUs.get(currentUID);
+        		
+        		// assign GU
+        		this.assignGU(currentUID, reservedGUs);
+        		
+        	}else {
+        		reservedGU = IRSOCF.determineGU(hashtable);
+        	}
+        }else {
+        	reservedGU = this.determineGU(hashtable);
+        }
         
         this.getABMF().setRemainingDataAllowance(this.getRemainingDataAllowance() - reservedGU);
         
@@ -191,6 +221,36 @@ public class OnlineChargingSystem {
     		OnlineChargingFunctionInventoryBasedReservationScheme IRSOCF = (OnlineChargingFunctionInventoryBasedReservationScheme)this.getOCF();
     		IRSOCF.storeDemandInfo(ueID, totalDemand, dataRate);
     	}
+    }
+    
+    // call back the reserved GU of devices
+    public void callBack() {
+    	
+    	double calledBackGU = 0;
+    	for(int i = 0; i < UeArr.size(); i++) {
+    		UserEquipment ue = UeArr.get(i);
+    		double withdrewGU = ue.callBack();
+    		
+    		calledBackGU += withdrewGU;
+    	}
+    	
+    	// add the called back GU to remaining data allowance
+    	double remainingDataAllowance = this.getRemainingDataAllowance();
+    	remainingDataAllowance += calledBackGU;
+    	
+    	this.getABMF().setRemainingDataAllowance(remainingDataAllowance);
+    }
+    
+    // assign GU
+    public void assignGU(int UEID, Hashtable reservedGUs) {
+    	for(int i = 0; i < UeArr.size(); i++) {
+    		UserEquipment ue = UeArr.get(i);
+    		int ID = ue.getUeID();
+    		
+    		double reservedGU = (double)reservedGUs.get(ID);
+    		ue.setCurrentGU(reservedGU);
+    	}
+    	
     }
     
 }
