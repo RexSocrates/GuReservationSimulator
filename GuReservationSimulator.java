@@ -171,10 +171,20 @@ public class GuReservationSimulator {
 //    	
 //    	inputFile.close();
     	
-    	// verify the program logic, set the selected IDs
+    	// read selected UE IDs
+    	String selectedIDsFile = "IDs.txt";
+    	File file = new File(selectedIDsFile);
+    	
+    	Scanner inputFile = new Scanner(file);
+    	
+    	// remove title
+    	inputFile.nextLine();
+    	
     	for(int i = 0; i < cellIDs.length; i++) {
-    		cellIDs[i] = i + 1;
+    		cellIDs[i] = inputFile.nextInt();
     	}
+    	
+    	inputFile.close();
     	
     	
     	for(int i = 0; i < cellIDs.length; i++) {
