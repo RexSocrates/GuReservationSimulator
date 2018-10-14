@@ -191,7 +191,7 @@ public class GuReservationSimulator {
     	
     	if(option == 3) {
     		// enter some variable that IRS needs
-    		System.out.print("Enter data collection periods(hour) : ");
+    		System.out.print("Enter data collection periods(hour 1 ~ 24) : ");
         	dataCollectionPeriods = input.nextDouble();
         	System.out.println("");
         	
@@ -306,6 +306,8 @@ public class GuReservationSimulator {
 						}
 					}
 				}
+				
+				inputFile.close();
 			}
 		}
 	}
@@ -324,7 +326,7 @@ public class GuReservationSimulator {
 	}
 	
 	// read periodical data rate and total usage
-	private static void readDataRateFile(int[] cellIDs, double[] dataRates, double[] totalUsageArr) throws FileNotFoundException {
+	private static void readDataRateFile(int[] ueIDs, double[] dataRates, double[] totalUsageArr) throws FileNotFoundException {
 		/*
 		String fileName = "statistic_01.csv";
 		
@@ -345,9 +347,9 @@ public class GuReservationSimulator {
 			double periodicalDataUsage = Double.parseDouble(tupleData[1]);
 			double totalUsage = Double.parseDouble(tupleData[2]);
 			
-			for(int i = 0; i < cellIDs.length; i++) {
+			for(int i = 0; i < ueIDs.length; i++) {
 				// compare cell ID
-				int currentCellID = cellIDs[i];
+				int currentCellID = ueIDs[i];
 				if(currentCellID == ID) {
 					dataRates[i] = periodicalDataUsage;
 					totalUsageArr[i] = totalUsage;
@@ -361,7 +363,7 @@ public class GuReservationSimulator {
 				}
 			}
 			
-//			if(cellIdIndex >= cellIDs.length) {
+//			if(cellIdIndex >= ueIDs.length) {
 //				break;
 //			}
 		}
@@ -369,44 +371,40 @@ public class GuReservationSimulator {
 		inputFile.close();
 		*/
 		
-		for(int day = 1; day <= 7; day++) {
-			String dateString = "2013_11_0" + day + "_";
-			for(int hour = 0; hour <= 23; hour ++) {
-				String fileName = "";
-				if(hour < 10) {
-					fileName = dateString + "0" + hour;
-				}else {
-					fileName = dateString + hour;
-				}
+		// dataCollectionPeriods
+		
+		String dataCollectionPeriodFileName = "";
+		int dataCollectionPeriodsInt = (int)dataCollectionPeriods;
+		if(dataCollectionPeriodsInt < 10) {
+			dataCollectionPeriodFileName = "cycleTimeOptimalGU_0" + dataCollectionPeriodsInt + ".csv";
+		}else {
+			dataCollectionPeriodFileName = "cycleTimeOptimalGU_" + dataCollectionPeriodsInt + ".csv";
+		}
+		
+		File file = new File(dataCollectionPeriodFileName);
+		
+		Scanner inputFile = new Scanner(file);
+		
+		// remove title
+		inputFile.nextLine();
+		
+		while(inputFile.hasNext()) {
+			String tuple = inputFile.nextLine();
+			String[] tupleArr = tuple.split(",");
+			
+			int ueID = Integer.parseInt(tupleArr[0]);
+			double totalInternetUsage = Double.parseDouble(tupleArr[1]);
+			double dataRate = Double.parseDouble(tupleArr[2]);
+			
+			for(int i = 0; i < ueIDs.length; i++) {
+				int currentUeID = ueIDs[i];
 				
-				File file = new File(fileName);
-				
-				Scanner fileInput = new Scanner(file);
-				
-				// remove title
-				fileInput.nextLine();
-				
-				while(fileInput.hasNext()) {
-					String dataTuple = fileInput.nextLine();
-					String[] dataTupleArr = dataTuple.split(",");
+				if(currentUeID == ueID) {
+					dataRates[i] = dataRate;
+					totalUsageArr[i] = totalInternetUsage;
 					
-					int ueID = Integer.parseInt(dataTupleArr[0]);
-					double internetUsage = Math.floor(Double.parseDouble(dataTupleArr[1]));
-					
-					for(int i = 0; i < cellIDs.length; i++) {
-						int currentUeID = cellIDs[i];
-						
-						if(currentUeID == ueID) {
-							// Data rate 未補上
-							dataRates[i] = 0;
-							totalUsageArr[i] = internetUsage;
-							
-							break;
-						}
-					}
+					break;
 				}
-				
-				fileInput.close();
 			}
 		}
 		
