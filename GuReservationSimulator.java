@@ -226,6 +226,7 @@ public class GuReservationSimulator {
 	// File IO Functions
 	// read quota usage in each time period from the file
 	private static void readTotalUsageFile() throws FileNotFoundException {
+		/*
 		String fileName = "usage_01.csv";
 		File file = new File(fileName);
 		Scanner inputFile = new Scanner(file);
@@ -265,6 +266,48 @@ public class GuReservationSimulator {
 		}
 		
 		inputFile.close();
+		*/
+		
+		for(int day = 1; day <= 7; day++) {
+			String dateString = "2013_11_0" + day + "_";
+			for(int hour = 0; hour <= 23; hour++) {
+				String fileName = "";
+				if(hour < 10) {
+					fileName = dateString + "0" + hour;
+				}else {
+					fileName = dateString + hour;
+				}
+				
+				File file = new File(fileName);
+				Scanner inputFile = new Scanner(file);
+				
+				// remove title
+				inputFile.nextLine();
+				
+				while(inputFile.hasNext()) {
+					String tuple = inputFile.nextLine();
+					String[] tupleArr = tuple.split(",");
+					
+					int ueID = Integer.parseInt(tupleArr[0]);
+					double internetUsage = Math.floor(Double.parseDouble(tupleArr[1]));
+					
+					int time = (day - 1) * 24 + hour;
+					
+					// insert the Internet usage into UE
+					for(int i = 0; i < UeArr.size(); i++) {
+						UserEquipment ue = UeArr.get(i);
+						
+						if(ueID == ue.getUeID()) {
+							DailyUsage ueDailyUsage = ue.getDailyUsage();
+							
+							ueDailyUsage.addHourlyUsage(time, internetUsage);
+							
+							break;
+						}
+					}
+				}
+			}
+		}
 	}
 	
 	private static Hashtable<String, double[]> getPeriodicalDataUsageAndTotalUsage(int numberOfDevices, int[] cellIDs) throws FileNotFoundException {
@@ -282,6 +325,7 @@ public class GuReservationSimulator {
 	
 	// read periodical data rate and total usage
 	private static void readDataRateFile(int[] cellIDs, double[] dataRates, double[] totalUsageArr) throws FileNotFoundException {
+		/*
 		String fileName = "statistic_01.csv";
 		
 		File file = new File(fileName);
@@ -323,6 +367,48 @@ public class GuReservationSimulator {
 		}
 		
 		inputFile.close();
+		*/
+		
+		for(int day = 1; day <= 7; day++) {
+			String dateString = "2013_11_0" + day + "_";
+			for(int hour = 0; hour <= 23; hour ++) {
+				String fileName = "";
+				if(hour < 10) {
+					fileName = dateString + "0" + hour;
+				}else {
+					fileName = dateString + hour;
+				}
+				
+				File file = new File(fileName);
+				
+				Scanner fileInput = new Scanner(file);
+				
+				// remove title
+				fileInput.nextLine();
+				
+				while(fileInput.hasNext()) {
+					String dataTuple = fileInput.nextLine();
+					String[] dataTupleArr = dataTuple.split(",");
+					
+					int ueID = Integer.parseInt(dataTupleArr[0]);
+					double internetUsage = Math.floor(Double.parseDouble(dataTupleArr[1]));
+					
+					for(int i = 0; i < cellIDs.length; i++) {
+						int currentUeID = cellIDs[i];
+						
+						if(currentUeID == ueID) {
+							// Data rate 未補上
+							dataRates[i] = 0;
+							totalUsageArr[i] = internetUsage;
+							
+							break;
+						}
+					}
+				}
+				
+				fileInput.close();
+			}
+		}
 		
 	}
 	
