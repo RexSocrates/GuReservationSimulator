@@ -141,7 +141,7 @@ public class GuReservationSimulator {
 	private static void initializeUserEquipments(int numOfDevices, int option) throws FileNotFoundException {
 		System.out.println("++++++++++++++++++++");
     	// randomly select the user equipment
-    	int[] cellIDs = new int[numOfDevices];
+    	int[] ueIDs = new int[numOfDevices];
 //    	for(int i = 0; i < numOfDevices; i++) {
 //    		int cellID = (int)(Math.random() * 10001);
 //    		
@@ -180,18 +180,18 @@ public class GuReservationSimulator {
     	// remove title
     	inputFile.nextLine();
     	
-    	for(int i = 0; i < cellIDs.length; i++) {
-    		cellIDs[i] = inputFile.nextInt();
+    	for(int i = 0; i < ueIDs.length; i++) {
+    		ueIDs[i] = inputFile.nextInt();
     	}
     	
     	inputFile.close();
     	
     	
-    	for(int i = 0; i < cellIDs.length; i++) {
-    		System.out.println("Cell ID : " + cellIDs[i]);
+    	for(int i = 0; i < ueIDs.length; i++) {
+    		System.out.println("Cell ID : " + ueIDs[i]);
     	}
     	
-    	Arrays.sort(cellIDs);
+    	Arrays.sort(ueIDs);
     	
     	dataCollectionPeriods = 0;
     	reportInterval = 0;
@@ -217,18 +217,18 @@ public class GuReservationSimulator {
     	
     	
     	
-		for(int i = 0; i < cellIDs.length; i++) {
-			int cellID = cellIDs[i];
+		for(int i = 0; i < ueIDs.length; i++) {
+			int ueID = ueIDs[i];
 			
 			if(option == 1 || option == 2) {
 				// fixed scheme
-				UeArr.add(new UserEquipment(cellID, OCS, "FS"));
+				UeArr.add(new UserEquipment(ueID, OCS, "FS"));
 			}else if(option == 2) {
 				// multiplicative scheme
-				UeArr.add(new UserEquipment(cellID, OCS, "MS"));
+				UeArr.add(new UserEquipment(ueID, OCS, "MS"));
 			}else if(option == 3) {
 				// Inventory-based reservation scheme
-				UeArr.add(new UserEquipment(cellID, "Regular", OCS, chargingPeriods, dataCollectionPeriods, reportInterval, totalDemands[i], dataUsages[i], "IRS"));
+				UeArr.add(new UserEquipment(ueID, "Regular", OCS, chargingPeriods, dataCollectionPeriods, reportInterval, totalDemands[i], dataUsages[i], "IRS"));
 			}
 		}
 	}
