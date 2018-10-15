@@ -276,6 +276,7 @@ public class OnlineChargingFunctionInventoryBasedReservationScheme extends Onlin
 //		double remainingDataAllowance = (double)hashtable.get("remainingDataAllowance");
 		
 		double reservedGU = this.defaultGU;
+		System.out.println("IRS reserved GU : " + reservedGU);
 		// if the sum of EGUs <= remaining data allowance, then allocate the optimal granted unit for the device
 		
 		if(this.optimalGUsHashtable.containsKey(ueID)) {

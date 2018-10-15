@@ -78,14 +78,16 @@ public class OnlineChargingSystem {
         		Hashtable reservedGUs = IRSOCF.getSurplusGu(hashtable);
         		
         		// get the reserved GU for this UE
-        		int currentUID = (int)hashtable.get("UEID");
+        		int currentUID = ((Double)hashtable.get("UEID")).intValue();
         		reservedGU = (double)reservedGUs.get(currentUID);
+        		System.out.println("Get surplus GU : " + reservedGU);
         		
         		// assign GU
         		this.assignGU(currentUID, reservedGUs);
         		
         	}else {
         		reservedGU = IRSOCF.determineGU(hashtable);
+        		System.out.println("Determine GU : " + reservedGU);
         	}
         }else {
         	reservedGU = this.determineGU(hashtable);
@@ -103,6 +105,7 @@ public class OnlineChargingSystem {
         	hashtable.put("dataAllowanceNotEnough", 1);
         }
         */
+        
         
         
         // send online charging response to tell the UE how much granted unit it can use
@@ -225,7 +228,7 @@ public class OnlineChargingSystem {
     
     // call back the reserved GU of devices
     public void callBack() {
-    	
+    	System.out.println("Call back GU");
     	double calledBackGU = 0;
     	for(int i = 0; i < UeArr.size(); i++) {
     		UserEquipment ue = UeArr.get(i);
@@ -243,6 +246,7 @@ public class OnlineChargingSystem {
     
     // assign GU
     public void assignGU(int UEID, Hashtable reservedGUs) {
+    	System.out.println("Assign GU");
     	for(int i = 0; i < UeArr.size(); i++) {
     		UserEquipment ue = UeArr.get(i);
     		int ID = ue.getUeID();

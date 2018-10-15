@@ -26,7 +26,7 @@ public class GuReservationSimulator {
     static OnlineChargingSystem OCS;
     static double defaultGU = 0;
     // count by hours
-    static double chargingPeriods = 5;
+    static double chargingPeriods = 168;
     static double reportInterval = 1;
     static double dataCollectionPeriods = 1;
     static int[] cellIDs;
@@ -209,7 +209,7 @@ public class GuReservationSimulator {
         	reportInterval = input.nextDouble();
         	System.out.println("");
         	
-        	Hashtable<String, double[]> dataRateAndTotalUsage = getPeriodicalDataUsageAndTotalUsage(numOfDevices, cellIDs);
+        	Hashtable<String, double[]> dataRateAndTotalUsage = getPeriodicalDataUsageAndTotalUsage(numOfDevices, ueIDs);
         	
         	totalDemands = (double[]) dataRateAndTotalUsage.get("totalUsage");
         	dataUsages = (double[]) dataRateAndTotalUsage.get("dataRate");
@@ -411,6 +411,8 @@ public class GuReservationSimulator {
 			for(int i = 0; i < ueIDs.length; i++) {
 				int currentUeID = ueIDs[i];
 				
+				System.out.println("Current UE ID : " + currentUeID);
+				
 				if(currentUeID == ueID) {
 					dataRates[i] = dataRate;
 					totalUsageArr[i] = totalInternetUsage;
@@ -419,6 +421,8 @@ public class GuReservationSimulator {
 				}
 			}
 		}
+		
+		inputFile.close();
 		
 	}
 	
@@ -651,11 +655,4 @@ public class GuReservationSimulator {
     		OCS.setTotalDemandAndDataRate(ueID, totalDemand, dataRate);
     	}
     }
-    
-    
-    // call back remaining GU of each devices
-    public static void callBack() {
-    	
-    }
-    
 }
