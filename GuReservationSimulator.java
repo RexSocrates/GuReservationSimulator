@@ -172,7 +172,7 @@ public class GuReservationSimulator {
 //    	inputFile.close();
     	
     	// read selected UE IDs
-    	String selectedIDsFile = "IDs.txt";
+    	String selectedIDsFile = "IDs.csv";
     	File file = new File(selectedIDsFile);
     	
     	Scanner inputFile = new Scanner(file);
