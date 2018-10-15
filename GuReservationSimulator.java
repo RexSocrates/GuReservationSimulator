@@ -283,9 +283,9 @@ public class GuReservationSimulator {
 			for(int hour = 0; hour <= 23; hour++) {
 				String fileName = "";
 				if(hour < 10) {
-					fileName = dateString + "0" + hour;
+					fileName = dateString + "0" + hour + ".csv";
 				}else {
-					fileName = dateString + hour;
+					fileName = dateString + hour + ".csv";
 				}
 				
 				File file = new File(fileName);
