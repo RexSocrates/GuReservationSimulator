@@ -411,8 +411,6 @@ public class GuReservationSimulator {
 			for(int i = 0; i < ueIDs.length; i++) {
 				int currentUeID = ueIDs[i];
 				
-				System.out.println("Current UE ID : " + currentUeID);
-				
 				if(currentUeID == ueID) {
 					dataRates[i] = dataRate;
 					totalUsageArr[i] = totalInternetUsage;
