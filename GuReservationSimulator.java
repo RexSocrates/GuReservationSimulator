@@ -291,6 +291,8 @@ public class GuReservationSimulator {
 				File file = new File(fileName);
 				Scanner inputFile = new Scanner(file);
 				
+				System.out.println("Read log file : " + fileName);
+				
 				// remove title
 				inputFile.nextLine();
 				
