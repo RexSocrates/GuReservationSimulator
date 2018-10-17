@@ -451,6 +451,7 @@ public class GuReservationSimulator {
 	
 	// set the total data allowance with normal distribution
 	private static double dataAllowanceSetting(int numOfDevices) {
+		/*
 		// store the data allowance of data plans in an array
 		double[] dataAllowanceArr = {500, 1024, 3072, 5120};
 		
@@ -477,6 +478,9 @@ public class GuReservationSimulator {
 		
 		// change monthly allowance to weekly allowance
 		return totalDataAllowance / 4;
+		*/
+		
+		return numOfDevices * 500 / 4;
 	}
 	
 
