@@ -278,7 +278,7 @@ public class UserEquipment {
     
     // session start, requesting GU
     public boolean sendOnlineChargingRequestSessionStart(double timePeriod) {
-    	interaction += 1;
+    	this.interaction += 1;
 //        System.out.println("sendOnlineChargingRequestSessionStart");
         
         // call next function, the parameter is a signals counter, it will return the number of signals
@@ -333,7 +333,7 @@ public class UserEquipment {
     
     // session continue, requesting GU
     public boolean sendOnlineChargingRequestSessionContinue(double reservationCount) {
-    	interaction += 1;
+    	this.interaction += 1;
 //    	System.out.println("sendOnlineChargingRequestSessionContinue");
         
         // send the online charging request, so the initial number of signals is 1
@@ -362,7 +362,7 @@ public class UserEquipment {
     
     // session end
     public void sendOnlineChargingRequestSessionEnd() {
-    	interaction += 1;
+    	this.interaction += 1;
 //    	System.out.println("sendOnlineChargingRequestSessionEnd");
     	
         // send the online charging request, so the initial number of signals is 1
@@ -375,7 +375,7 @@ public class UserEquipment {
     
     // call back remaining GU
     public double callBack() {
-    	interaction += 1;
+    	this.interaction += 1;
     	// when the remaining data allowance is not enough, the OCS will take the back the remaining GU of devices 
     	double withdrewGU = this.getCurrentGU();
     	this.setCurrentGU(this.getCurrentGU() - withdrewGU);
