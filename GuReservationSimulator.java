@@ -301,7 +301,7 @@ public class GuReservationSimulator {
 					String[] tupleArr = tuple.split(",");
 					
 					int ueID = Integer.parseInt(tupleArr[0]);
-					double internetUsage = Math.floor(Double.parseDouble(tupleArr[1]));
+					double internetUsage = Math.ceil(Double.parseDouble(tupleArr[1]));
 					
 					int time = (day - 1) * 24 + hour;
 					

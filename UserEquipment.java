@@ -380,6 +380,8 @@ public class UserEquipment {
     	double withdrewGU = this.getCurrentGU();
     	this.setCurrentGU(this.getCurrentGU() - withdrewGU);
     	
+    	this.setProducedSignals(this.getProducedSignals() + 2);
+    	
     	return withdrewGU;
     }
 }
