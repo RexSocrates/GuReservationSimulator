@@ -540,8 +540,9 @@ public class GuReservationSimulator {
 //    	chargingPeriods = input.nextDouble();
 //    	System.out.println("");
     	
-		System.out.print("Enter default GU(MB) for inventory-based reservation scheme : ");
-		defaultGU = input.nextDouble();
+//		System.out.print("Enter default GU(MB) for inventory-based reservation scheme : ");
+//		defaultGU = input.nextDouble();
+		defaultGU = 10;
 //		defaultGU = defaultGU * 130;
 		System.out.println("");
 		
