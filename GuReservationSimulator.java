@@ -49,12 +49,14 @@ public class GuReservationSimulator {
         		"Multiplicative scheme",
         		"Inventory-based Reservation Scheme"
         };
-        
+        /*
         for(int i = 0; i < reservationSchemes.length; i++) {
         	System.out.printf("%2d . %s\n", i+1, reservationSchemes[i]);
         }
         System.out.print("Choose the reservation scheme : ");
         int option = input.nextInt();
+        */
+        int option = 3;
         System.out.println("");
         
         // configure the experiment
@@ -188,8 +190,22 @@ public class GuReservationSimulator {
     	
     	if(option == 3) {
     		// enter some variable that IRS needs
-    		System.out.print("Enter data collection periods(hour 1 ~ 24) : ");
+    		System.out.print("Enter data collection periods(hour 1 ~ 168) : ");
         	dataCollectionPeriods = input.nextDouble();
+        	
+        	// read period length file
+        	String periodFileName = "periods.txt";
+        	File periodFile = new File(periodFileName);
+        	Scanner periodFileInput = new Scanner(periodFile);
+        	
+        	dataCollectionPeriods = periodFileInput.nextDouble();
+        	
+        	// write period file
+        	PrintWriter pw = new PrintWriter(periodFileName);
+        	double newPeriodLength = dataCollectionPeriods + 1;
+        	pw.print(newPeriodLength);
+        	pw.close();
+        	
         	System.out.println("");
         	
         	System.out.print("Enter report interval(hour) : ");
@@ -586,11 +602,9 @@ public class GuReservationSimulator {
     	String timeStr = dateStrArr[3].replaceAll(":", "_");
     	String filename = dateStrArr[5] + dateStrArr[1] + dateStrArr[2] + "_" + timeStr;
     	
-    	String cellsFileName = filename + "_cells.txt";
+    	String logFilename = filename + ".txt";
     	
-    	filename = filename + ".txt";
-    	
-    	PrintWriter pw = new PrintWriter(filename);
+    	PrintWriter pw = new PrintWriter(logFilename);
     	
     	double totalSignals = 0;
     	
@@ -626,15 +640,12 @@ public class GuReservationSimulator {
 		
 		pw.close();
 		
-		// print cell IDs
-//		pw = new PrintWriter(cellsFileName);
-//		for(int i = 0; i < UeArr.size(); i++) {
-//			UserEquipment ue = UeArr.get(i);
-//			pw.println(ue.getUeID());
-//		}
-//		
-//		pw.close();
-    	
+		// print short experiment result
+		String shortResultName = filename + "_short.txt";
+		
+		PrintWriter shortPW = new PrintWriter(shortResultName);
+		shortPW.printf("%f , %f , %f", totalInteractionTimes, totalSignals, (totalSucdcessfulRate / numOfDevices));
+		shortPW.close();
 	}
     
     // 傳送所有 UE 的總需求以及data rate 到 OCS
