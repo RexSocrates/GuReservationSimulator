@@ -190,8 +190,8 @@ public class GuReservationSimulator {
     	
     	if(option == 3) {
     		// enter some variable that IRS needs
-    		System.out.print("Enter data collection periods(hour 1 ~ 168) : ");
-        	dataCollectionPeriods = input.nextDouble();
+//    		System.out.print("Enter data collection periods(hour 1 ~ 168) : ");
+//        	dataCollectionPeriods = input.nextDouble();
         	
         	// read period length file
         	String periodFileName = "periods.txt";
@@ -208,8 +208,9 @@ public class GuReservationSimulator {
         	
         	System.out.println("");
         	
-        	System.out.print("Enter report interval(hour) : ");
-        	reportInterval = input.nextDouble();
+//        	System.out.print("Enter report interval(hour) : ");
+//        	reportInterval = input.nextDouble();
+        	reportInterval = 1;
         	System.out.println("");
         	
         	Hashtable<String, double[]> dataRateAndTotalUsage = getPeriodicalDataUsageAndTotalUsage(numOfDevices, ueIDs);
