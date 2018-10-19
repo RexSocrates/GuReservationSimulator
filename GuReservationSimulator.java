@@ -265,7 +265,7 @@ public class GuReservationSimulator {
 		*/
 		
 		for(int day = 1; day <= 7; day++) {
-			String dateString = "selectedIDs_2013_11_0" + day + "_";
+			String dateString = "2013_11_0" + day + "_";
 			for(int hour = 0; hour <= 23; hour++) {
 				String fileName = "";
 				if(hour < 10) {
@@ -371,12 +371,12 @@ public class GuReservationSimulator {
 		
 		// dataCollectionPeriods
 		
-		String dataCollectionPeriodFileName = "selectedIDs_";
+		String dataCollectionPeriodFileName = "";
 		int dataCollectionPeriodsInt = (int)dataCollectionPeriods;
 		if(dataCollectionPeriodsInt < 10) {
-			dataCollectionPeriodFileName = dataCollectionPeriodFileName + "cycleTimeOptimalGU_0" + dataCollectionPeriodsInt + ".csv";
+			dataCollectionPeriodFileName = "cycleTimeOptimalGU_0" + dataCollectionPeriodsInt + ".csv";
 		}else {
-			dataCollectionPeriodFileName = dataCollectionPeriodFileName + "cycleTimeOptimalGU_" + dataCollectionPeriodsInt + ".csv";
+			dataCollectionPeriodFileName = "cycleTimeOptimalGU_" + dataCollectionPeriodsInt + ".csv";
 		}
 		
 		File file = new File(dataCollectionPeriodFileName);
