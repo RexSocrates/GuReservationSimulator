@@ -37,8 +37,9 @@ public class GuReservationSimulator {
      * @throws FileNotFoundException 
      */
     public static void main(String[] args) throws FileNotFoundException {
-        System.out.print("Enter the number of devices : ");
-        int numOfDevices = input.nextInt();
+//        System.out.print("Enter the number of devices : ");
+//        int numOfDevices = input.nextInt();
+        int numOfDevices = 7;
         System.out.println("");
         cellIDs = new int[numOfDevices];
         
