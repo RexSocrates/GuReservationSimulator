@@ -49,14 +49,14 @@ public class GuReservationSimulator {
         		"Multiplicative scheme",
         		"Inventory-based Reservation Scheme"
         };
-        /*
+        
         for(int i = 0; i < reservationSchemes.length; i++) {
         	System.out.printf("%2d . %s\n", i+1, reservationSchemes[i]);
         }
         System.out.print("Choose the reservation scheme : ");
         int option = input.nextInt();
-        */
-        int option = 3;
+        
+        
         System.out.println("");
         
         // configure the experiment
@@ -74,10 +74,6 @@ public class GuReservationSimulator {
         // add the user equipments into the array
         initializeUserEquipments(numOfDevices, option);
         readTotalUsageFile();
-        
-        // stimulate that there are lots of sessions should be completed
-//        System.out.print("Enter the random GU range ( > 0) : ");
-//        double randomRange = input.nextDouble();
         
         
         // stimulate that time is moving
@@ -190,8 +186,8 @@ public class GuReservationSimulator {
     	
     	if(option == 3) {
     		// enter some variable that IRS needs
-//    		System.out.print("Enter data collection periods(hour 1 ~ 168) : ");
-//        	dataCollectionPeriods = input.nextDouble();
+    		System.out.print("Enter data collection periods(hour 1 ~ 168) : ");
+        	dataCollectionPeriods = input.nextDouble();
         	
         	// read period length file
         	String periodFileName = "periods.txt";
@@ -208,8 +204,8 @@ public class GuReservationSimulator {
         	
         	System.out.println("");
         	
-//        	System.out.print("Enter report interval(hour) : ");
-//        	reportInterval = input.nextDouble();
+        	System.out.print("Enter report interval(hour) : ");
+        	reportInterval = input.nextDouble();
         	reportInterval = 1;
         	System.out.println("");
         	
@@ -542,9 +538,10 @@ public class GuReservationSimulator {
     	
 //		System.out.print("Enter default GU(MB) for inventory-based reservation scheme : ");
 //		defaultGU = input.nextDouble();
+    	// in IRS the default GU of each device is obtained from total demand and default GU calculation
 		defaultGU = 10;
 //		defaultGU = defaultGU * 130;
-		System.out.println("");
+//		System.out.println("");
 		
 //		System.out.print("Enter the signals of each report");
 //		double signalsPerReport = input.nextDouble();
