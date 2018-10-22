@@ -30,16 +30,15 @@ public class GuReservationSimulator {
     static double reportInterval = 1;
     static double dataCollectionPeriods = 1;
     static int[] cellIDs;
-//    static String resultFileName = "";
 
     /**
      * @param args the command line arguments
      * @throws FileNotFoundException 
      */
     public static void main(String[] args) throws FileNotFoundException {
-//        System.out.print("Enter the number of devices : ");
-//        int numOfDevices = input.nextInt();
-        int numOfDevices = 7;
+        System.out.print("Enter the number of devices : ");
+        int numOfDevices = input.nextInt();
+//        int numOfDevices = 7;
         System.out.println("");
         cellIDs = new int[numOfDevices];
         
@@ -645,6 +644,7 @@ public class GuReservationSimulator {
 		PrintWriter shortPW = new PrintWriter(shortResultName);
 		shortPW.printf("%f , %f , %f", totalInteractionTimes, totalSignals, (totalSucdcessfulRate / numOfDevices));
 		shortPW.close();
+		
 	}
     
     // 傳送所有 UE 的總需求以及data rate 到 OCS
