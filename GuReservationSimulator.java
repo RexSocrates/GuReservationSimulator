@@ -459,9 +459,9 @@ public class GuReservationSimulator {
 	// configure the reservation schemes
     private static OnlineChargingSystem fixedScheme(double totalDataAllowance) {
     	// hyper-parameters
-//        System.out.print("Enter the default GU(MB) for fixed scheme : ");
-//        defaultGU = input.nextDouble();
-//        System.out.println("");
+        System.out.print("Enter the default GU(MB) for fixed scheme : ");
+        defaultGU = input.nextDouble();
+        System.out.println("");
         
         
         
