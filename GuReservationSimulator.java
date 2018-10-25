@@ -68,7 +68,7 @@ public class GuReservationSimulator {
 //        }
 //        System.out.print("Choose the reservation scheme : ");
 //        int option = input.nextInt();
-        int option = 1;
+        int option = 2;
         
         
         System.out.println("");
@@ -463,7 +463,7 @@ public class GuReservationSimulator {
 //        defaultGU = input.nextDouble();
 //        System.out.println("");
         
-        defaultGU = 40;
+        
         
         // configure online charging function for fixed scheme
         OnlineChargingFunctionFixedScheme OCF = new OnlineChargingFunctionFixedScheme(defaultGU, chargingPeriods);
@@ -478,6 +478,7 @@ public class GuReservationSimulator {
 
     private static OnlineChargingSystem multiplicativeScheme(double totalDataAllowance) {
     	// hyper-parameters
+    	/*
         System.out.print("Enter default GU(MB) for multiplicative scheme : ");
         defaultGU = input.nextDouble();
         System.out.println("");
@@ -485,6 +486,9 @@ public class GuReservationSimulator {
         System.out.print("Enter C : ");
         double c = input.nextDouble();
         System.out.println("");
+        */
+        defaultGU = 40;
+        double c = 1;
         
         // configure online charging function for multiplicative scheme
         OnlineChargingFunctionMultiplicativeScheme OCF = new OnlineChargingFunctionMultiplicativeScheme(defaultGU, c, chargingPeriods);
