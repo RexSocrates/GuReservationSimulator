@@ -36,9 +36,9 @@ public class GuReservationSimulator {
      * @throws FileNotFoundException 
      */
     public static void main(String[] args) throws FileNotFoundException {
-        System.out.print("Enter the number of devices : ");
-        int numOfDevices = input.nextInt();
-//        int numOfDevices = 7;
+//        System.out.print("Enter the number of devices : ");
+//        int numOfDevices = input.nextInt();
+        int numOfDevices = 7;
         System.out.println("");
         cellIDs = new int[numOfDevices];
         
@@ -49,12 +49,12 @@ public class GuReservationSimulator {
         		"Inventory-based Reservation Scheme"
         };
         
-        for(int i = 0; i < reservationSchemes.length; i++) {
-        	System.out.printf("%2d . %s\n", i+1, reservationSchemes[i]);
-        }
-        System.out.print("Choose the reservation scheme : ");
-        int option = input.nextInt();
-//        int option = 3;
+//        for(int i = 0; i < reservationSchemes.length; i++) {
+//        	System.out.printf("%2d . %s\n", i+1, reservationSchemes[i]);
+//        }
+//        System.out.print("Choose the reservation scheme : ");
+//        int option = input.nextInt();
+        int option = 1;
         
         
         System.out.println("");
@@ -443,12 +443,28 @@ public class GuReservationSimulator {
 	
 
 	// configure the reservation schemes
-    private static OnlineChargingSystem fixedScheme(double totalDataAllowance) {
+    private static OnlineChargingSystem fixedScheme(double totalDataAllowance) throws FileNotFoundException {
     	// hyper-parameters
-        System.out.print("Enter the default GU(MB) for fixed scheme : ");
-        defaultGU = input.nextDouble();
-        System.out.println("");
+//        System.out.print("Enter the default GU(MB) for fixed scheme : ");
+//        defaultGU = input.nextDouble();
+//        System.out.println("");
         
+        double[] defaultGUList = {1, 5, 10, 30, 35, 40, 50, 250, 500, 1000};
+        
+        //read default GU index
+        File defaultGUIndexFile = new File("defaultGUIndex.txt");
+        Scanner defaultGUInput = new Scanner(defaultGUIndexFile);
+        
+        int defaultGUIndex = defaultGUInput.nextInt();
+        int newDefaultGUIndex = defaultGUIndex + 1;
+        defaultGUInput.close();
+        
+        // write new default GU index
+        PrintWriter defaultGUPW = new PrintWriter("defaultGUIndex.txt");
+        defaultGUPW.print(newDefaultGUIndex);
+        defaultGUPW.close();
+        
+        defaultGU = defaultGUList[defaultGUIndex];
         
         
         // configure online charging function for fixed scheme
