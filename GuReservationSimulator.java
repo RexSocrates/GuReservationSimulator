@@ -36,10 +36,24 @@ public class GuReservationSimulator {
      * @throws FileNotFoundException 
      */
     public static void main(String[] args) throws FileNotFoundException {
-        System.out.print("Enter the number of devices : ");
-        int numOfDevices = input.nextInt();
+//        System.out.print("Enter the number of devices : ");
+//        int numOfDevices = input.nextInt();
 //        int numOfDevices = 7;
-        System.out.println("");
+//        System.out.println("");
+        
+        // read number of devices file
+        File numOfDeviceFile = new File("numberOfDevices.txt");
+        Scanner numOfDeviceInput = new Scanner(numOfDeviceFile);
+        
+        int numOfDevices = numOfDeviceInput.nextInt();
+        numOfDeviceInput.close();
+        
+        // write number of devices file
+        int newNumOfDevices = numOfDevices + 1;
+        PrintWriter numOfDevicePW = new PrintWriter("numberOfDevices.txt");
+        numOfDevicePW.print(newNumOfDevices);
+        numOfDevicePW.close();
+        
         cellIDs = new int[numOfDevices];
         
         // print reservation scheme options
@@ -49,12 +63,12 @@ public class GuReservationSimulator {
         		"Inventory-based Reservation Scheme"
         };
         
-        for(int i = 0; i < reservationSchemes.length; i++) {
-        	System.out.printf("%2d . %s\n", i+1, reservationSchemes[i]);
-        }
-        System.out.print("Choose the reservation scheme : ");
-        int option = input.nextInt();
-//        int option = 3;
+//        for(int i = 0; i < reservationSchemes.length; i++) {
+//        	System.out.printf("%2d . %s\n", i+1, reservationSchemes[i]);
+//        }
+//        System.out.print("Choose the reservation scheme : ");
+//        int option = input.nextInt();
+        int option = 1;
         
         
         System.out.println("");
@@ -445,11 +459,11 @@ public class GuReservationSimulator {
 	// configure the reservation schemes
     private static OnlineChargingSystem fixedScheme(double totalDataAllowance) {
     	// hyper-parameters
-        System.out.print("Enter the default GU(MB) for fixed scheme : ");
-        defaultGU = input.nextDouble();
-        System.out.println("");
+//        System.out.print("Enter the default GU(MB) for fixed scheme : ");
+//        defaultGU = input.nextDouble();
+//        System.out.println("");
         
-        
+        defaultGU = 40;
         
         // configure online charging function for fixed scheme
         OnlineChargingFunctionFixedScheme OCF = new OnlineChargingFunctionFixedScheme(defaultGU, chargingPeriods);
