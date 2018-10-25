@@ -36,9 +36,9 @@ public class GuReservationSimulator {
      * @throws FileNotFoundException 
      */
     public static void main(String[] args) throws FileNotFoundException {
-//        System.out.print("Enter the number of devices : ");
-//        int numOfDevices = input.nextInt();
-        int numOfDevices = 7;
+        System.out.print("Enter the number of devices : ");
+        int numOfDevices = input.nextInt();
+//        int numOfDevices = 7;
         System.out.println("");
         cellIDs = new int[numOfDevices];
         
@@ -49,12 +49,12 @@ public class GuReservationSimulator {
         		"Inventory-based Reservation Scheme"
         };
         
-//        for(int i = 0; i < reservationSchemes.length; i++) {
-//        	System.out.printf("%2d . %s\n", i+1, reservationSchemes[i]);
-//        }
-//        System.out.print("Choose the reservation scheme : ");
-//        int option = input.nextInt();
-        int option = 3;
+        for(int i = 0; i < reservationSchemes.length; i++) {
+        	System.out.printf("%2d . %s\n", i+1, reservationSchemes[i]);
+        }
+        System.out.print("Choose the reservation scheme : ");
+        int option = input.nextInt();
+//        int option = 3;
         
         
         System.out.println("");
@@ -187,10 +187,11 @@ public class GuReservationSimulator {
     	
     	if(option == 3) {
     		// enter some variable that IRS needs
-//    		System.out.print("Enter data collection periods(hour 1 ~ 168) : ");
-//        	dataCollectionPeriods = input.nextDouble();
+    		System.out.print("Enter data collection periods(hour 1 ~ 168) : ");
+        	dataCollectionPeriods = input.nextDouble();
         	
         	// read period length file
+    		/*
         	String periodFileName = "periods.txt";
         	File periodFile = new File(periodFileName);
         	Scanner periodFileInput = new Scanner(periodFile);
@@ -203,7 +204,7 @@ public class GuReservationSimulator {
         	pw.print(newPeriodLength);
         	pw.close();
         	System.out.println("");
-        	
+        	*/
         	
         	
 //        	System.out.print("Enter report interval(hour) : ");
