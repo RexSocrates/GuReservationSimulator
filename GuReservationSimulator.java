@@ -36,9 +36,9 @@ public class GuReservationSimulator {
      * @throws FileNotFoundException 
      */
     public static void main(String[] args) throws FileNotFoundException {
-        System.out.print("Enter the number of devices : ");
-        int numOfDevices = input.nextInt();
-//        int numOfDevices = 7;
+//        System.out.print("Enter the number of devices : ");
+//        int numOfDevices = input.nextInt();
+        int numOfDevices = 7;
         System.out.println("");
         cellIDs = new int[numOfDevices];
         
@@ -49,11 +49,12 @@ public class GuReservationSimulator {
         		"Inventory-based Reservation Scheme"
         };
         
-        for(int i = 0; i < reservationSchemes.length; i++) {
-        	System.out.printf("%2d . %s\n", i+1, reservationSchemes[i]);
-        }
-        System.out.print("Choose the reservation scheme : ");
-        int option = input.nextInt();
+//        for(int i = 0; i < reservationSchemes.length; i++) {
+//        	System.out.printf("%2d . %s\n", i+1, reservationSchemes[i]);
+//        }
+//        System.out.print("Choose the reservation scheme : ");
+//        int option = input.nextInt();
+        int option = 3;
         
         
         System.out.println("");
@@ -84,6 +85,10 @@ public class GuReservationSimulator {
         setTotalDemandAndDataRate();
         
         while(chargingProcessContinue(OCS.getRemainingDataAllowance(), timePeriod)) {
+        	if(timePeriod % reportInterval == 0) {
+        		reportCurrentStatus(timePeriod);
+        	}
+        	
         	System.out.println("Time period : " + timePeriod);
         	for(int i = 0; i < UeArr.size(); i++) {
         		UserEquipment ue = UeArr.get(i);
@@ -96,10 +101,6 @@ public class GuReservationSimulator {
         		System.out.println("");
         		
         		ue.completeSession(consumedGU, timePeriod);
-        	}
-        	
-        	if(timePeriod % reportInterval == 0) {
-        		reportCurrentStatus(timePeriod);
         	}
             
             System.out.printf("Remaining data allowance : %10.2f\n", OCS.getRemainingDataAllowance());
@@ -116,6 +117,7 @@ public class GuReservationSimulator {
         System.out.printf("Number of devices : %d\n", numOfDevices);
         System.out.printf("Reservation scheme : %s\n", reservationSchemes[option - 1]);
         System.out.printf("Monthly data allowance : %3.0f\n", totalDataAllowance);
+        System.out.printf("Remaining data allowance : %3.0f\n", OCS.getABMF().getRemainingDataAllowance());
         System.out.println("Data collection period : " + dataCollectionPeriods);
         System.out.printf("Default GU : %5.0f\n", defaultGU);
         
@@ -178,15 +180,15 @@ public class GuReservationSimulator {
     	Arrays.sort(ueIDs);
     	
     	dataCollectionPeriods = 0;
-    	reportInterval = 0;
+    	
     	
     	double[] totalDemands = new double[numOfDevices];
     	double[] dataUsages = new double[numOfDevices];
     	
     	if(option == 3) {
     		// enter some variable that IRS needs
-    		System.out.print("Enter data collection periods(hour 1 ~ 168) : ");
-        	dataCollectionPeriods = input.nextDouble();
+//    		System.out.print("Enter data collection periods(hour 1 ~ 168) : ");
+//        	dataCollectionPeriods = input.nextDouble();
         	
         	// read period length file
         	String periodFileName = "periods.txt";
@@ -200,12 +202,13 @@ public class GuReservationSimulator {
         	double newPeriodLength = dataCollectionPeriods + 1;
         	pw.print(newPeriodLength);
         	pw.close();
-        	
         	System.out.println("");
         	
-        	System.out.print("Enter report interval(hour) : ");
-        	reportInterval = input.nextDouble();
-        	reportInterval = 1;
+        	
+        	
+//        	System.out.print("Enter report interval(hour) : ");
+//        	reportInterval = input.nextDouble();
+        	reportInterval = dataCollectionPeriods;
         	System.out.println("");
         	
         	Hashtable<String, double[]> dataRateAndTotalUsage = getPeriodicalDataUsageAndTotalUsage(numOfDevices, ueIDs);
@@ -338,52 +341,7 @@ public class GuReservationSimulator {
 	
 	// read periodical data rate and total usage
 	private static void readDataRateFile(int[] ueIDs, double[] dataRates, double[] totalUsageArr) throws FileNotFoundException {
-		/*
-		String fileName = "statistic_01.csv";
-		
-		File file = new File(fileName);
-		Scanner inputFile = new Scanner(file);
-		
-		// remove title
-		inputFile.nextLine();
-		
-//		int cellIdIndex = 0;
-		
-		while(inputFile.hasNext()) {
-			String singleTuple = inputFile.nextLine();
-			
-			// split a tuple
-			String[] tupleData = singleTuple.split(",");
-			int ID = Integer.parseInt(tupleData[0]);
-			double periodicalDataUsage = Double.parseDouble(tupleData[1]);
-			double totalUsage = Double.parseDouble(tupleData[2]);
-			
-			for(int i = 0; i < ueIDs.length; i++) {
-				// compare cell ID
-				int currentCellID = ueIDs[i];
-				if(currentCellID == ID) {
-					dataRates[i] = periodicalDataUsage;
-					totalUsageArr[i] = totalUsage;
-					
-					// count the number of devices whose data rate and total usage are filled
-//					cellIdIndex += 1;
-					
-					System.out.println("**************************");
-					System.out.println("Cell ID : " + ID);
-					break;
-				}
-			}
-			
-//			if(cellIdIndex >= ueIDs.length) {
-//				break;
-//			}
-		}
-		
-		inputFile.close();
-		*/
-		
 		// dataCollectionPeriods
-		
 		String dataCollectionPeriodFileName = "";
 		int dataCollectionPeriodsInt = (int)dataCollectionPeriods;
 		if(dataCollectionPeriodsInt < 10) {
@@ -479,7 +437,7 @@ public class GuReservationSimulator {
 		return totalDataAllowance / 4;
 		*/
 		
-		return numOfDevices * 500 / 4 * 0.75;
+		return Math.ceil(numOfDevices * 500 / 4);
 	}
 	
 
@@ -488,7 +446,6 @@ public class GuReservationSimulator {
     	// hyper-parameters
         System.out.print("Enter the default GU(MB) for fixed scheme : ");
         defaultGU = input.nextDouble();
-//        defaultGU = defaultGU * 130;
         System.out.println("");
         
         
@@ -508,7 +465,6 @@ public class GuReservationSimulator {
     	// hyper-parameters
         System.out.print("Enter default GU(MB) for multiplicative scheme : ");
         defaultGU = input.nextDouble();
-//        defaultGU = defaultGU * 130;
         System.out.println("");
         
         System.out.print("Enter C : ");
@@ -552,7 +508,7 @@ public class GuReservationSimulator {
 //		double signalsPerOrder = input.nextDouble();
 //		System.out.println("");
 		
-		double signalsPerOrder = 6;
+		double signalsPerOrder = 1;
 		
 		// configure online charging function for IRS
 		OnlineChargingFunctionInventoryBasedReservationScheme OCF = new OnlineChargingFunctionInventoryBasedReservationScheme(defaultGU, chargingPeriods, signalsPerReport, signalsPerOrder);

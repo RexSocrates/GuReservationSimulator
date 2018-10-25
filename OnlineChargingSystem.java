@@ -17,6 +17,7 @@ public class OnlineChargingSystem {
     private OnlineChargingFunctionReservationScheme OCF;
     private AccountBalanceManagementFunction ABMF;
     String reservationSchemeName = "";
+    boolean callBack = true;
     
     public OnlineChargingSystem(ArrayList<UserEquipment> ueArr, OnlineChargingFunctionReservationScheme OCF, AccountBalanceManagementFunction ABMF, String reservationSchemeName) {
         this.UeArr = ueArr;
@@ -228,33 +229,47 @@ public class OnlineChargingSystem {
     
     // call back the reserved GU of devices
     public void callBack() {
-    	System.out.println("Call back GU");
-    	double calledBackGU = 0;
-    	for(int i = 0; i < UeArr.size(); i++) {
-    		UserEquipment ue = UeArr.get(i);
-    		double withdrewGU = ue.callBack();
-    		
-    		calledBackGU += withdrewGU;
+    	if(callBack) {
+    		double calledBackGU = 0;
+        	for(int i = 0; i < UeArr.size(); i++) {
+        		UserEquipment ue = UeArr.get(i);
+        		double withdrewGU = ue.callBack();
+        		
+        		calledBackGU += withdrewGU;
+        	}
+        	
+        	// add the called back GU to remaining data allowance
+        	double remainingDataAllowance = this.getRemainingDataAllowance();
+        	remainingDataAllowance += calledBackGU;
+        	
+        	this.getABMF().setRemainingDataAllowance(remainingDataAllowance);
+        	
+        	if(remainingDataAllowance < UeArr.size()) {
+        		callBack = false;
+        	}
+        	
+        	System.out.println("Called back RD : " + remainingDataAllowance);
     	}
-    	
-    	// add the called back GU to remaining data allowance
-    	double remainingDataAllowance = this.getRemainingDataAllowance();
-    	remainingDataAllowance += calledBackGU;
-    	
-    	this.getABMF().setRemainingDataAllowance(remainingDataAllowance);
     }
     
     // assign GU
     public void assignGU(int UEID, Hashtable reservedGUs) {
     	System.out.println("Assign GU");
+    	double totalReservedGU = 0;
     	for(int i = 0; i < UeArr.size(); i++) {
     		UserEquipment ue = UeArr.get(i);
     		int ID = ue.getUeID();
     		
-    		double reservedGU = (double)reservedGUs.get(ID);
-    		ue.setCurrentGU(reservedGU);
+    		if (ID != UEID) {
+    			double reservedGU = (double)reservedGUs.get(ID);
+    			totalReservedGU += reservedGU;
+        		ue.setCurrentGU(reservedGU);    			
+    		}
     	}
     	
+    	// subtract the reserved GUs
+    	double remainingDataAllowance = this.getRemainingDataAllowance();
+    	this.getABMF().setRemainingDataAllowance(remainingDataAllowance - totalReservedGU);
     }
     
 }

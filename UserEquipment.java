@@ -64,7 +64,7 @@ public class UserEquipment {
         this.allocatedGUs = new ArrayList<Double>();
         this.periodAllocatedRecords = new ArrayList<SinglePeriodAllocatedGUs>();
         this.reservationScheme = reservationScheme;
-        this.reportUeStatus = false;
+        this.reportUeStatus = true;
         this.currentTimePeriod = 1;
         // charging data
         this.dailyUsage = new DailyUsage();
@@ -182,7 +182,6 @@ public class UserEquipment {
     // return current status, including remaining GU of UE and the average data rate
     public Hashtable reportCurrentStatus(double currentTime) {
     	Hashtable<String, Double> hashtable = new Hashtable<String, Double>();
-    	// only variable devices need to report their status
     	if(needToReport(currentTime)) {
     		interaction += 1;
         	
@@ -217,7 +216,7 @@ public class UserEquipment {
     public boolean needToReport(double currentTime) {
     	boolean report = false;
     	
-    	if(this.getCurrentGU() > 0 || currentTime == 1) {
+    	if(this.getCurrentGU() > 0 || currentTime == 1 || this.reportUeStatus) {
     		report = true;
     	}
     	return report;
@@ -376,11 +375,10 @@ public class UserEquipment {
     // call back remaining GU
     public double callBack() {
     	this.interaction += 1;
+    	this.setProducedSignals(this.getProducedSignals() + 1);
     	// when the remaining data allowance is not enough, the OCS will take the back the remaining GU of devices 
     	double withdrewGU = this.getCurrentGU();
     	this.setCurrentGU(this.getCurrentGU() - withdrewGU);
-    	
-    	this.setProducedSignals(this.getProducedSignals() + 2);
     	
     	return withdrewGU;
     }
