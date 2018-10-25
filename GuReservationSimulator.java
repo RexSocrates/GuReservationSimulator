@@ -68,7 +68,7 @@ public class GuReservationSimulator {
 //        }
 //        System.out.print("Choose the reservation scheme : ");
 //        int option = input.nextInt();
-        int option = 2;
+        int option = 3;
         
         
         System.out.println("");
@@ -201,8 +201,9 @@ public class GuReservationSimulator {
     	
     	if(option == 3) {
     		// enter some variable that IRS needs
-    		System.out.print("Enter data collection periods(hour 1 ~ 168) : ");
-        	dataCollectionPeriods = input.nextDouble();
+//    		System.out.print("Enter data collection periods(hour 1 ~ 168) : ");
+//        	dataCollectionPeriods = input.nextDouble();
+    		dataCollectionPeriods = 150;
         	
         	// read period length file
     		/*
@@ -478,7 +479,6 @@ public class GuReservationSimulator {
 
     private static OnlineChargingSystem multiplicativeScheme(double totalDataAllowance) {
     	// hyper-parameters
-    	/*
         System.out.print("Enter default GU(MB) for multiplicative scheme : ");
         defaultGU = input.nextDouble();
         System.out.println("");
@@ -486,9 +486,8 @@ public class GuReservationSimulator {
         System.out.print("Enter C : ");
         double c = input.nextDouble();
         System.out.println("");
-        */
-        defaultGU = 40;
-        double c = 1;
+        
+        
         
         // configure online charging function for multiplicative scheme
         OnlineChargingFunctionMultiplicativeScheme OCF = new OnlineChargingFunctionMultiplicativeScheme(defaultGU, c, chargingPeriods);
