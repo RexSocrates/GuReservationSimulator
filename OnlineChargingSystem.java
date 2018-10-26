@@ -84,7 +84,7 @@ public class OnlineChargingSystem {
         		System.out.println("Get surplus GU : " + reservedGU);
         		
         		// assign GU
-        		this.assignGU(currentUID, reservedGUs);
+//        		this.assignGU(currentUID, reservedGUs);
         		
         	}else {
         		reservedGU = IRSOCF.determineGU(hashtable);
