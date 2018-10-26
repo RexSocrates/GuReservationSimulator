@@ -374,7 +374,7 @@ public class UserEquipment {
     
     // call back remaining GU
     public double callBack() {
-//    	this.interaction += 1;
+    	this.interaction += 1;
     	this.setProducedSignals(this.getProducedSignals() + 1);
     	// when the remaining data allowance is not enough, the OCS will take the back the remaining GU of devices 
     	double withdrewGU = this.getCurrentGU();
