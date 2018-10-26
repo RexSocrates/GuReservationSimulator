@@ -196,6 +196,7 @@ public class GuReservationSimulator {
         	Scanner periodFileInput = new Scanner(periodFile);
         	
         	dataCollectionPeriods = periodFileInput.nextDouble();
+        	periodFileInput.close();
         	
         	// write period file
         	PrintWriter pw = new PrintWriter(periodFileName);
