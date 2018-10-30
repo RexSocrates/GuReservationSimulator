@@ -452,7 +452,8 @@ public class GuReservationSimulator {
 		return totalDataAllowance / 4;
 		*/
 		
-		return Math.ceil(numOfDevices * 500 / 4);
+//		return Math.ceil(numOfDevices * 500 / 4);
+		return 500;
 	}
 	
 
