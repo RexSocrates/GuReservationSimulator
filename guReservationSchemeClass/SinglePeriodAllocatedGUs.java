@@ -1,3 +1,4 @@
+package guReservationSchemeClass;
 import java.util.ArrayList;
 
 public class SinglePeriodAllocatedGUs {

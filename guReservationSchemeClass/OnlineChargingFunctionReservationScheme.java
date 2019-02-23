@@ -1,3 +1,4 @@
+package guReservationSchemeClass;
 import java.util.Hashtable;
 
 public class OnlineChargingFunctionReservationScheme implements ReservationScheme {

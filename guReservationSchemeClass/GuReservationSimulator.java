@@ -1,10 +1,10 @@
+package guReservationSchemeClass;
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
 
-import java.util.Scanner;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
@@ -14,7 +14,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Hashtable;
-import java.util.Random;
+import java.util.Scanner;
+
+import guReservationSchemeClass.GuReservationSimulator.*;
 
 /**
  *
@@ -128,36 +130,28 @@ public class GuReservationSimulator {
 		System.out.println("++++++++++++++++++++");
     	// randomly select the user equipment
     	int[] ueIDs = new int[numOfDevices];
-//    	for(int i = 0; i < numOfDevices; i++) {
-//    		int cellID = (int)(Math.random() * 10001);
-//    		
-//    		// check if the cell ID is in the array
-//    		boolean cellIdInTheList = false;
-//    		for(int j = 0; j < i; j++) {
-//    			if(cellIDs[i] == cellIDs[j]) {
-//    				cellIdInTheList = true;
-//    			}
-//    		}
-//    		
-//    		if(cellIdInTheList) {
-//    			i--;
-//    		}else {
-//    			cellIDs[i] = cellID;
-//    		}
-//    	}
+    	for(int i = 0; i < numOfDevices; i++) {
+    		int selectedNewID = (int)(Math.random() * 20);
+    		
+    		// check whether the selected ID is in the list
+    		boolean idInTheList = false;
+    		for(int j = 0; j < ueIDs.length; j++) {
+    			if(selectedNewID == ueIDs[j]) {
+    				idInTheList = true;
+    				break;
+    			}
+    		}
+    		
+    		if(idInTheList) {
+    			i--;
+    		}else {
+    			ueIDs[i] = selectedNewID;
+    		}
+    	}
     	
-    	// read IDs file, which contains the randomly selected ID
-//    	File file = new File("cells/" + Integer.toString(numOfDevices) + ".txt");
-//    	Scanner inputFile = new Scanner(file);
-//    	
-//    	int cellCount = 0;
-//    	while(inputFile.hasNext()) {
-//    		cellIDs[cellCount++] = inputFile.nextInt();
-//    	}
-//    	
-//    	inputFile.close();
     	
     	// read selected UE IDs
+    	/*
     	String selectedIDsFile = "IDs.csv";
     	File file = new File(selectedIDsFile);
     	
@@ -176,8 +170,9 @@ public class GuReservationSimulator {
     	for(int i = 0; i < ueIDs.length; i++) {
     		System.out.println("Cell ID : " + ueIDs[i]);
     	}
-    	
+    	*/
     	Arrays.sort(ueIDs);
+    	
     	
     	dataCollectionPeriods = 0;
     	
@@ -438,7 +433,8 @@ public class GuReservationSimulator {
 		return totalDataAllowance / 4;
 		*/
 		
-//		return Math.ceil(numOfDevices * 500 / 4);
+		// change MB to KB
+//		return Math.ceil(numOfDevices * 500 / 4) * 1024;
 		return 500;
 	}
 	
