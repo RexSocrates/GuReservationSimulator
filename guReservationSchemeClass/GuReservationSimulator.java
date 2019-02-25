@@ -131,6 +131,8 @@ public class GuReservationSimulator {
     	// randomly select the user equipment
     	int[] ueIDs = new int[numOfDevices];
     	for(int i = 0; i < numOfDevices; i++) {
+    		ueIDs[i] = i + 1;
+    		/*
     		int selectedNewID = (int)(Math.random() * 20);
     		
     		// check whether the selected ID is in the list
@@ -142,11 +144,13 @@ public class GuReservationSimulator {
     			}
     		}
     		
+    		
     		if(idInTheList) {
     			i--;
     		}else {
     			ueIDs[i] = selectedNewID;
     		}
+    		*/
     	}
     	
     	
@@ -170,9 +174,9 @@ public class GuReservationSimulator {
     	for(int i = 0; i < ueIDs.length; i++) {
     		System.out.println("Cell ID : " + ueIDs[i]);
     	}
-    	*/
-    	Arrays.sort(ueIDs);
     	
+    	Arrays.sort(ueIDs);
+    	*/
     	
     	dataCollectionPeriods = 0;
     	
@@ -277,7 +281,7 @@ public class GuReservationSimulator {
 		*/
 		
 		for(int day = 1; day <= 7; day++) {
-			String dateString = "2013_11_0" + day + "_";
+			String dateString = "sample_00_kb_shrink_2013_11_0" + day + "_";
 			for(int hour = 0; hour <= 23; hour++) {
 				String fileName = "";
 				if(hour < 10) {
@@ -341,9 +345,9 @@ public class GuReservationSimulator {
 		String dataCollectionPeriodFileName = "";
 		int dataCollectionPeriodsInt = (int)dataCollectionPeriods;
 		if(dataCollectionPeriodsInt < 10) {
-			dataCollectionPeriodFileName = "cycleTimeOptimalGU_0" + dataCollectionPeriodsInt + ".csv";
+			dataCollectionPeriodFileName = "sample_00_cycleTimeOptimalGU_0" + dataCollectionPeriodsInt + ".csv";
 		}else {
-			dataCollectionPeriodFileName = "cycleTimeOptimalGU_" + dataCollectionPeriodsInt + ".csv";
+			dataCollectionPeriodFileName = "sample_00_cycleTimeOptimalGU_" + dataCollectionPeriodsInt + ".csv";
 		}
 		
 		File file = new File(dataCollectionPeriodFileName);
@@ -435,18 +439,34 @@ public class GuReservationSimulator {
 		
 		// change MB to KB
 //		return Math.ceil(numOfDevices * 500 / 4) * 1024;
-		return 500;
+		return 500 * 1024;
 	}
 	
 
 	// configure the reservation schemes
-    private static OnlineChargingSystem fixedScheme(double totalDataAllowance) {
+    private static OnlineChargingSystem fixedScheme(double totalDataAllowance) throws FileNotFoundException{
     	// hyper-parameters
         System.out.print("Enter the default GU(MB) for fixed scheme : ");
         defaultGU = input.nextDouble();
         System.out.println("");
         
+        // read default GU value from a txt file
+        /*
+        File defaultGU_file = new File("defaultGU.txt");
+        Scanner defaultGU_input = new Scanner(defaultGU_file);
         
+        defaultGU = defaultGU_input.nextDouble();
+        defaultGU_input.close();
+        */
+        
+        // write next default GU in a txt file
+        /*
+        double nextDefaultGU = defaultGU + 50;
+        File nextDefaultGU_file = new File("defaultGU.txt");
+        PrintWriter pw = new PrintWriter(nextDefaultGU_file);
+        pw.println(nextDefaultGU);
+        pw.close();
+        */
         
         // configure online charging function for fixed scheme
         OnlineChargingFunctionFixedScheme OCF = new OnlineChargingFunctionFixedScheme(defaultGU, chargingPeriods);
