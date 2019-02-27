@@ -38,9 +38,9 @@ public class GuReservationSimulator {
      * @throws FileNotFoundException 
      */
     public static void main(String[] args) throws FileNotFoundException {
-        System.out.print("Enter the number of devices : ");
-        int numOfDevices = input.nextInt();
-//        int numOfDevices = 7;
+//        System.out.print("Enter the number of devices : ");
+//        int numOfDevices = input.nextInt();
+        int numOfDevices = 7;
         System.out.println("");
         cellIDs = new int[numOfDevices];
         
@@ -54,9 +54,9 @@ public class GuReservationSimulator {
         for(int i = 0; i < reservationSchemes.length; i++) {
         	System.out.printf("%2d . %s\n", i+1, reservationSchemes[i]);
         }
-        System.out.print("Choose the reservation scheme : ");
-        int option = input.nextInt();
-//        int option = 3;
+//        System.out.print("Choose the reservation scheme : ");
+//        int option = input.nextInt();
+        int option = 1;
         
         
         System.out.println("");
@@ -438,35 +438,36 @@ public class GuReservationSimulator {
 		*/
 		
 		// change MB to KB
-//		return Math.ceil(numOfDevices * 500 / 4) * 1024;
-		return 500 * 1024;
+		return Math.ceil(numOfDevices * 500 / 4) * 1024;
+//		return 500 * 1024;
 	}
 	
 
 	// configure the reservation schemes
     private static OnlineChargingSystem fixedScheme(double totalDataAllowance) throws FileNotFoundException{
     	// hyper-parameters
-        System.out.print("Enter the default GU(MB) for fixed scheme : ");
-        defaultGU = input.nextDouble();
-        System.out.println("");
+//        System.out.print("Enter the default GU(MB) for fixed scheme : ");
+//        defaultGU = input.nextDouble();
+//        System.out.println("");
+        
+        double[] defaultGU_list = {50, 100, 150, 200, 250, 300, 400, 500};
         
         // read default GU value from a txt file
-        /*
         File defaultGU_file = new File("defaultGU.txt");
         Scanner defaultGU_input = new Scanner(defaultGU_file);
         
-        defaultGU = defaultGU_input.nextDouble();
+        int defaultGU_index = defaultGU_input.nextInt();
+        defaultGU = defaultGU_list[defaultGU_index];
         defaultGU_input.close();
-        */
+        
         
         // write next default GU in a txt file
-        /*
-        double nextDefaultGU = defaultGU + 50;
+        int nextDefaultGU_index = defaultGU_index + 1;
         File nextDefaultGU_file = new File("defaultGU.txt");
         PrintWriter pw = new PrintWriter(nextDefaultGU_file);
-        pw.println(nextDefaultGU);
+        pw.println(nextDefaultGU_index);
         pw.close();
-        */
+        
         
         // configure online charging function for fixed scheme
         OnlineChargingFunctionFixedScheme OCF = new OnlineChargingFunctionFixedScheme(defaultGU, chargingPeriods);
