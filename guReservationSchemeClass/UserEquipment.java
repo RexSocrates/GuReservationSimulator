@@ -53,6 +53,12 @@ public class UserEquipment {
     double dataCollectionPeriod;
     // report interval
     double reportInterval;
+    // count the times that Credit Control Request sent
+    double countRequestTimes = 0;
+    // count the times that Credit Control Request sent and a new granted unit has been allocated.
+    double countSuccessfulRequestTimes = 0;
+    // count the times that CCR sent and no granted unit has been allocated
+    double countFailedRequestTimes = 0;
     
     // charging data, index is date, value is the daily usage of the cell
     DailyUsage dailyUsage;
@@ -140,8 +146,12 @@ public class UserEquipment {
     }
     
     public double getSuccessfulRate() {
-    	double successfulTimes = this.numberOfSessions - this.sessionFailedTimes;
-    	return successfulTimes / this.numberOfSessions;
+//    	double successfulTimes = this.numberOfSessions - this.sessionFailedTimes;
+//    	return successfulTimes / this.numberOfSessions;
+    	
+    	double successRate = (this.countRequestTimes - this.countFailedRequestTimes) / this.countRequestTimes;
+//    	double successRate = this.countSuccessfulRequestTimes / this.countRequestTimes;
+    	return successRate;
     }
     
     public DailyUsage getDailyUsage() {
@@ -258,6 +268,7 @@ public class UserEquipment {
         		// the allocated surplus GU is not enough for this session
         		this.setCurrentGU(0);
         		this.sessionFailedTimes += 1;
+        		this.countFailedRequestTimes += 1;
         	}
         }
         else {
@@ -278,6 +289,7 @@ public class UserEquipment {
     
     // session start, requesting GU
     public boolean sendOnlineChargingRequestSessionStart(double timePeriod) {
+    	this.countRequestTimes += 1;
     	this.interaction += 1;
 //        System.out.println("sendOnlineChargingRequestSessionStart");
         
@@ -299,6 +311,9 @@ public class UserEquipment {
         
         // update granted unit
         double allocatedGU = (double) hashtable.get("reservedGU");
+        if(allocatedGU > 0) {
+        	this.countSuccessfulRequestTimes += 1;
+        }
         this.setCurrentGU(this.getCurrentGU() + allocatedGU);
         // add the allocated GU to the list
         this.allocatedGUs.add(allocatedGU);
@@ -333,6 +348,7 @@ public class UserEquipment {
     
     // session continue, requesting GU
     public boolean sendOnlineChargingRequestSessionContinue(double reservationCount) {
+    	this.countRequestTimes += 1;
     	this.interaction += 1;
 //    	System.out.println("sendOnlineChargingRequestSessionContinue");
         
@@ -348,6 +364,9 @@ public class UserEquipment {
         double reservedGU = (double) hashtable.get("reservedGU");
 //        System.out.printf("Session continue, reserved GU : %f\n", reservedGU);
         
+        if(reservedGU > 0) {
+        	this.countSuccessfulRequestTimes += 1;
+        }
         this.setCurrentGU(this.getCurrentGU() + reservedGU);
         this.allocatedGUs.add(reservedGU);
         
@@ -362,6 +381,7 @@ public class UserEquipment {
     
     // session end
     public void sendOnlineChargingRequestSessionEnd() {
+//    	this.countRequestTimes += 1;
     	this.interaction += 1;
 //    	System.out.println("sendOnlineChargingRequestSessionEnd");
     	

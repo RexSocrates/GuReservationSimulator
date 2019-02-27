@@ -264,7 +264,7 @@ public class OnlineChargingSystem {
     		if (ID != UEID) {
     			double reservedGU = (double)reservedGUs.get(ID);
     			totalReservedGU += reservedGU;
-        		ue.setCurrentGU(reservedGU);    			
+        		ue.setCurrentGU(reservedGU);
     		}
     	}
     	
