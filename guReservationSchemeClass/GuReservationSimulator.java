@@ -32,12 +32,14 @@ public class GuReservationSimulator {
     static double reportInterval = 1;
     static double dataCollectionPeriods = 1;
     static int[] cellIDs;
+    static String sampleIndexStr = "sample_";
 
     /**
      * @param args the command line arguments
      * @throws FileNotFoundException 
      */
     public static void main(String[] args) throws FileNotFoundException {
+    	getRandomSampleIndex();
         System.out.print("Enter the number of devices : ");
         int numOfDevices = input.nextInt();
 //        int numOfDevices = 7;
@@ -56,7 +58,7 @@ public class GuReservationSimulator {
         }
         System.out.print("Choose the reservation scheme : ");
         int option = input.nextInt();
-//        int option = 3;
+//        int option = 2;
         
         
         System.out.println("");
@@ -125,6 +127,22 @@ public class GuReservationSimulator {
         
         writeExperimentResult(numOfDevices, reservationSchemes[option - 1], totalDataAllowance, defaultGU);
     }
+
+	private static void getRandomSampleIndex() throws FileNotFoundException {
+		File sampleIndexFile = new File("sampleIndex.txt");
+		Scanner sampleIndexFileInput = new Scanner(sampleIndexFile);
+		int sampleIndex = sampleIndexFileInput.nextInt();
+		
+		if(sampleIndex < 10) {
+			sampleIndexStr += "0" + sampleIndex + "_";
+		}else {
+			sampleIndexStr += sampleIndex + "_";
+		}
+		
+		PrintWriter pw = new PrintWriter("sampleIndex.txt");
+		pw.println(++sampleIndex);
+		pw.close();
+	}
 
 	private static void initializeUserEquipments(int numOfDevices, int option) throws FileNotFoundException {
 		System.out.println("++++++++++++++++++++");
@@ -281,7 +299,7 @@ public class GuReservationSimulator {
 		*/
 		
 		for(int day = 1; day <= 7; day++) {
-			String dateString = "sample_00_kb_shrink_2013_11_0" + day + "_";
+			String dateString = sampleIndexStr + "kb_shrink_2013_11_0" + day + "_";
 			for(int hour = 0; hour <= 23; hour++) {
 				String fileName = "";
 				if(hour < 10) {
@@ -345,9 +363,9 @@ public class GuReservationSimulator {
 		String dataCollectionPeriodFileName = "";
 		int dataCollectionPeriodsInt = (int)dataCollectionPeriods;
 		if(dataCollectionPeriodsInt < 10) {
-			dataCollectionPeriodFileName = "sample_00_cycleTimeOptimalGU_0" + dataCollectionPeriodsInt + ".csv";
+			dataCollectionPeriodFileName = sampleIndexStr + "cycleTimeOptimalGU_0" + dataCollectionPeriodsInt + ".csv";
 		}else {
-			dataCollectionPeriodFileName = "sample_00_cycleTimeOptimalGU_" + dataCollectionPeriodsInt + ".csv";
+			dataCollectionPeriodFileName = sampleIndexStr + "cycleTimeOptimalGU_" + dataCollectionPeriodsInt + ".csv";
 		}
 		
 		File file = new File(dataCollectionPeriodFileName);
