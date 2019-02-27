@@ -503,7 +503,7 @@ public class GuReservationSimulator {
         defaultGU = input.nextDouble();
         System.out.println("");
         
-        double[] defaultGU_list = {};
+        double[] defaultGU_list = {50, 100, 150, 200, 250, 300, 400, 500};
         
         // read default GU index
         File defaultGUIndexFile = new File("defaultGU.txt");
