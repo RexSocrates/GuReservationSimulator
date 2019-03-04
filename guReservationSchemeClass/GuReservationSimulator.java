@@ -438,8 +438,7 @@ public class GuReservationSimulator {
 		*/
 		
 		// change MB to KB
-		return Math.ceil(numOfDevices * 500 / 4) * 1024;
-//		return 500 * 1024;
+		return Math.ceil(numOfDevices * 500 / 4) * 1024 * 0.8;
 	}
 	
 
