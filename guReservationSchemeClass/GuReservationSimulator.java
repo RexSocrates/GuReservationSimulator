@@ -32,12 +32,14 @@ public class GuReservationSimulator {
     static double reportInterval = 1;
     static double dataCollectionPeriods = 1;
     static int[] cellIDs;
+    static String sampleIndexStr = "sample_";
 
     /**
      * @param args the command line arguments
      * @throws FileNotFoundException 
      */
     public static void main(String[] args) throws FileNotFoundException {
+    	getRandomSampleIndex();
 //        System.out.print("Enter the number of devices : ");
 //        int numOfDevices = input.nextInt();
         int numOfDevices = 7;
@@ -125,6 +127,18 @@ public class GuReservationSimulator {
         
         writeExperimentResult(numOfDevices, reservationSchemes[option - 1], totalDataAllowance, defaultGU);
     }
+    
+    private static void getRandomSampleIndex() throws FileNotFoundException {
+		File sampleIndexFile = new File("sampleIndex.txt");
+		Scanner sampleIndexFileInput = new Scanner(sampleIndexFile);
+		int sampleIndex = sampleIndexFileInput.nextInt();
+		
+		if(sampleIndex < 10) {
+			sampleIndexStr += "0" + sampleIndex + "_";
+		}else {
+			sampleIndexStr += sampleIndex + "_";
+		}
+	}
 
 	private static void initializeUserEquipments(int numOfDevices, int option) throws FileNotFoundException {
 		System.out.println("++++++++++++++++++++");
