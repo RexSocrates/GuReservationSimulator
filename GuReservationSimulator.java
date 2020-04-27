@@ -31,7 +31,7 @@ public class GuReservationSimulator {
     // count by hours
     static double chargingPeriods = 168;
     // QRS 回報間隔時間 (單位：小時)
-    static double reportInterval = 1;
+    static double reportingCycle = 1;
     // QRS 一個 period 的時間長度 (單位：小時)
     static double dataCollectionPeriods = 1;
     // 用於記錄 UE 變好的陣列
@@ -61,16 +61,14 @@ public class GuReservationSimulator {
         }
         // 參數說明：變更 FSP 使用的預留機制 1:FS, 2:MS, 3:QRS
         System.out.print("Choose the reservation scheme : ");
-        int option = input.nextInt();
-//        int option = 3;
-        
-        
+        int indexOfSelectedReservationScheme = input.nextInt();
+//        int indexOfSelectedReservationScheme = 3;
         System.out.println("");
         
         // configure the experiment
         double totalDataAllowance = dataAllowanceSetting(numOfDevices);
         
-        switch(option) {
+        switch(indexOfSelectedReservationScheme) {
             case 1 : OCS = fixedScheme(totalDataAllowance);
                 break;
             case 2 : OCS = multiplicativeScheme(totalDataAllowance);
@@ -80,7 +78,7 @@ public class GuReservationSimulator {
         }
         
         // add the user equipments into the array
-        initializeUserEquipments(numOfDevices, option);
+        initializeUserEquipments(numOfDevices, indexOfSelectedReservationScheme);
         readTotalUsageFile();
         
         
@@ -93,7 +91,7 @@ public class GuReservationSimulator {
         setTotalDemandAndDataRate();
         
         while(chargingProcessContinue(OCS.getRemainingDataAllowance(), timePeriod)) {
-        	if(timePeriod % reportInterval == 0) {
+        	if(timePeriod % reportingCycle == 0) {
         		reportCurrentStatus(timePeriod);
         	}
         	
@@ -123,16 +121,16 @@ public class GuReservationSimulator {
         
         // print experiment configuration
         System.out.printf("Number of devices : %d\n", numOfDevices);
-        System.out.printf("Reservation scheme : %s\n", reservationSchemes[option - 1]);
+        System.out.printf("Reservation scheme : %s\n", reservationSchemes[indexOfSelectedReservationScheme - 1]);
         System.out.printf("Monthly data allowance : %3.0f\n", totalDataAllowance);
         System.out.printf("Remaining data allowance : %3.0f\n", OCS.getABMF().getRemainingDataAllowance());
         System.out.println("Data collection period : " + dataCollectionPeriods);
         System.out.printf("Default GU : %5.0f\n", defaultGU);
         
-        writeExperimentResult(numOfDevices, reservationSchemes[option - 1], totalDataAllowance, defaultGU);
+        writeExperimentResult(numOfDevices, reservationSchemes[indexOfSelectedReservationScheme - 1], totalDataAllowance, defaultGU);
     }
 
-	private static void initializeUserEquipments(int numOfDevices, int option) throws FileNotFoundException {
+	private static void initializeUserEquipments(int numOfDevices, int indexOfSelectedReservationScheme) throws FileNotFoundException {
 		System.out.println("++++++++++++++++++++");
     	// randomly select the user equipment
     	int[] ueIDs = new int[numOfDevices];
@@ -193,7 +191,7 @@ public class GuReservationSimulator {
     	double[] totalDemands = new double[numOfDevices];
     	double[] dataUsages = new double[numOfDevices];
     	
-    	if(option == 3) {
+    	if(indexOfSelectedReservationScheme == 3) {
     		// enter some variable that IRS needs
     		System.out.print("Enter data collection periods(hour 1 ~ 168) : ");
         	dataCollectionPeriods = input.nextDouble();
@@ -216,8 +214,8 @@ public class GuReservationSimulator {
         	
         	
 //        	System.out.print("Enter report interval(hour) : ");
-//        	reportInterval = input.nextDouble();
-        	reportInterval = dataCollectionPeriods;
+//        	reportingCycle = input.nextDouble();
+        	reportingCycle = dataCollectionPeriods;
         	System.out.println("");
         	
         	Hashtable<String, double[]> dataRateAndTotalUsage = getPeriodicalDataUsageAndTotalUsage(numOfDevices, ueIDs);
@@ -231,15 +229,15 @@ public class GuReservationSimulator {
 		for(int i = 0; i < ueIDs.length; i++) {
 			int ueID = ueIDs[i];
 			
-			if(option == 1 || option == 2) {
+			if(indexOfSelectedReservationScheme == 1 || indexOfSelectedReservationScheme == 2) {
 				// fixed scheme
 				UeArr.add(new UserEquipment(ueID, OCS, "FS"));
-			}else if(option == 2) {
+			}else if(indexOfSelectedReservationScheme == 2) {
 				// multiplicative scheme
 				UeArr.add(new UserEquipment(ueID, OCS, "MS"));
-			}else if(option == 3) {
+			}else if(indexOfSelectedReservationScheme == 3) {
 				// Inventory-based reservation scheme
-				UeArr.add(new UserEquipment(ueID, "Regular", OCS, chargingPeriods, dataCollectionPeriods, reportInterval, totalDemands[i], dataUsages[i], "IRS"));
+				UeArr.add(new UserEquipment(ueID, "Regular", OCS, chargingPeriods, dataCollectionPeriods, reportingCycle, totalDemands[i], dataUsages[i], "IRS"));
 			}
 		}
 	}
