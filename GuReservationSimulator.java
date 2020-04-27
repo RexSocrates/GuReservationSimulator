@@ -22,25 +22,32 @@ import java.util.Random;
  */
 public class GuReservationSimulator {
     static Scanner input = new Scanner(System.in);
+    // 儲存 UE 的陣列
     static ArrayList<UserEquipment> UeArr = new ArrayList<UserEquipment>();
+    // 即時計費系統物件
     static OnlineChargingSystem OCS;
+    // default GU 設定值
     static double defaultGU = 0;
     // count by hours
     static double chargingPeriods = 168;
+    // QRS 回報間隔時間 (單位：小時)
     static double reportInterval = 1;
+    // QRS 一個 period 的時間長度 (單位：小時)
     static double dataCollectionPeriods = 1;
-    static int[] cellIDs;
+    // 用於記錄 UE 變好的陣列
+    static int[] ueIDs;
 
     /**
      * @param args the command line arguments
      * @throws FileNotFoundException 
      */
     public static void main(String[] args) throws FileNotFoundException {
+    	// 參數說明：變更 FSP 內的裝置數量
         System.out.print("Enter the number of devices : ");
         int numOfDevices = input.nextInt();
 //        int numOfDevices = 7;
         System.out.println("");
-        cellIDs = new int[numOfDevices];
+        ueIDs = new int[numOfDevices];
         
         // print reservation scheme options
         String[] reservationSchemes = {
@@ -52,6 +59,7 @@ public class GuReservationSimulator {
         for(int i = 0; i < reservationSchemes.length; i++) {
         	System.out.printf("%2d . %s\n", i+1, reservationSchemes[i]);
         }
+        // 參數說明：變更 FSP 使用的預留機制 1:FS, 2:MS, 3:QRS
         System.out.print("Choose the reservation scheme : ");
         int option = input.nextInt();
 //        int option = 3;
@@ -134,7 +142,7 @@ public class GuReservationSimulator {
 //    		// check if the cell ID is in the array
 //    		boolean cellIdInTheList = false;
 //    		for(int j = 0; j < i; j++) {
-//    			if(cellIDs[i] == cellIDs[j]) {
+//    			if(ueIDs[i] == ueIDs[j]) {
 //    				cellIdInTheList = true;
 //    			}
 //    		}
@@ -142,7 +150,7 @@ public class GuReservationSimulator {
 //    		if(cellIdInTheList) {
 //    			i--;
 //    		}else {
-//    			cellIDs[i] = cellID;
+//    			ueIDs[i] = cellID;
 //    		}
 //    	}
     	
@@ -152,7 +160,7 @@ public class GuReservationSimulator {
 //    	
 //    	int cellCount = 0;
 //    	while(inputFile.hasNext()) {
-//    		cellIDs[cellCount++] = inputFile.nextInt();
+//    		ueIDs[cellCount++] = inputFile.nextInt();
 //    	}
 //    	
 //    	inputFile.close();
@@ -327,12 +335,12 @@ public class GuReservationSimulator {
 		}
 	}
 	
-	private static Hashtable<String, double[]> getPeriodicalDataUsageAndTotalUsage(int numberOfDevices, int[] cellIDs) throws FileNotFoundException {
+	private static Hashtable<String, double[]> getPeriodicalDataUsageAndTotalUsage(int numberOfDevices, int[] ueIDs) throws FileNotFoundException {
 		Hashtable<String, double[]> dataRateAndTotalUsage = new Hashtable<String, double[]>();
 		double[] dataRate = new double[numberOfDevices];
 		double[] totalUsage = new double[numberOfDevices];
 		
-		readDataRateFile(cellIDs, dataRate, totalUsage);
+		readDataRateFile(ueIDs, dataRate, totalUsage);
 		
 		dataRateAndTotalUsage.put("dataRate", dataRate);
 		dataRateAndTotalUsage.put("totalUsage", totalUsage);
@@ -408,6 +416,7 @@ public class GuReservationSimulator {
 	}
 	
 	// set the total data allowance with normal distribution
+	// 參數說明：變更 ABMF 的流量額度 (單位：MB)
 	private static double dataAllowanceSetting(int numOfDevices) {
 		/*
 		// store the data allowance of data plans in an array
@@ -445,7 +454,7 @@ public class GuReservationSimulator {
 
 	// configure the reservation schemes
     private static OnlineChargingSystem fixedScheme(double totalDataAllowance) {
-    	// hyper-parameters
+    	// 參數說明：變更 FS default GU (單位：MB)
         System.out.print("Enter the default GU(MB) for fixed scheme : ");
         defaultGU = input.nextDouble();
         System.out.println("");
@@ -464,11 +473,12 @@ public class GuReservationSimulator {
     }
 
     private static OnlineChargingSystem multiplicativeScheme(double totalDataAllowance) {
-    	// hyper-parameters
+    	// 參數說明：變更 MS default GU (單位：MB)
         System.out.print("Enter default GU(MB) for multiplicative scheme : ");
         defaultGU = input.nextDouble();
         System.out.println("");
         
+        // 參數說明：用於史 MS 增加分配 GU 的參數
         System.out.print("Enter C : ");
         double c = input.nextDouble();
         System.out.println("");
