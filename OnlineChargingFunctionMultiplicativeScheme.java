@@ -12,30 +12,30 @@ import java.util.Hashtable;
  * @author Socrates
  */
 public class OnlineChargingFunctionMultiplicativeScheme extends OnlineChargingFunctionReservationScheme {
-    private double c = 1;
+    private double allocatedGuIncreasingFactor = 1;
     
-    public OnlineChargingFunctionMultiplicativeScheme(double defaultGU, double c, double chargingPeriods) {
+    public OnlineChargingFunctionMultiplicativeScheme(double defaultGU, double allocatedGuIncreasingFactor, double chargingPeriods) {
         super(defaultGU, chargingPeriods, "MS");
-        this.c = c;
+        this.allocatedGuIncreasingFactor = allocatedGuIncreasingFactor;
     }
 
     public double getDefaultGU() {
         return defaultGU;
     }
 
-    public double getC() {
-        return c;
+    public double getAllocatedGuIncreasingFactor() {
+        return allocatedGuIncreasingFactor;
     }
 
     @Override
     public double determineGU(Hashtable hashtable) {
         // j is the number of reservations run by UE
-        double j = 1;
+        double consecutiveReservationTimes = 1;
         if(hashtable.containsKey("reservationCount")) {
-            j = (double)hashtable.get("reservationCount");
+            consecutiveReservationTimes = (double)hashtable.get("reservationCount");
         }
         System.out.printf("J : %5.0f\n", j);
-        double reservedGU = Math.ceil(j / this.c) * this.getDefaultGU();
+        double reservedGU = Math.ceil(consecutiveReservationTimes / this.allocatedGuIncreasingFactor) * this.getDefaultGU();
         
         double remainingDataAllowance = (double)hashtable.get("remainingDataAllowance");
         

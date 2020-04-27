@@ -33,7 +33,7 @@ public class GuReservationSimulator {
     // QRS 回報間隔時間 (單位：小時)
     static double reportingCycle = 1;
     // QRS 一個 period 的時間長度 (單位：小時)
-    static double dataCollectionPeriods = 1;
+    static double periodLength = 1;
     // 用於記錄 UE 變好的陣列
     static int[] ueIDs;
 
@@ -124,7 +124,7 @@ public class GuReservationSimulator {
         System.out.printf("Reservation scheme : %s\n", reservationSchemes[indexOfSelectedReservationScheme - 1]);
         System.out.printf("Monthly data allowance : %3.0f\n", totalDataAllowance);
         System.out.printf("Remaining data allowance : %3.0f\n", OCS.getABMF().getRemainingDataAllowance());
-        System.out.println("Data collection period : " + dataCollectionPeriods);
+        System.out.println("Data collection period : " + periodLength);
         System.out.printf("Default GU : %5.0f\n", defaultGU);
         
         writeExperimentResult(numOfDevices, reservationSchemes[indexOfSelectedReservationScheme - 1], totalDataAllowance, defaultGU);
@@ -185,7 +185,7 @@ public class GuReservationSimulator {
     	
     	Arrays.sort(ueIDs);
     	
-    	dataCollectionPeriods = 0;
+    	periodLength = 0;
     	
     	
     	double[] totalDemands = new double[numOfDevices];
@@ -194,7 +194,7 @@ public class GuReservationSimulator {
     	if(indexOfSelectedReservationScheme == 3) {
     		// enter some variable that IRS needs
     		System.out.print("Enter data collection periods(hour 1 ~ 168) : ");
-        	dataCollectionPeriods = input.nextDouble();
+        	periodLength = input.nextDouble();
         	
         	// read period length file
     		/*
@@ -202,11 +202,11 @@ public class GuReservationSimulator {
         	File periodFile = new File(periodFileName);
         	Scanner periodFileInput = new Scanner(periodFile);
         	
-        	dataCollectionPeriods = periodFileInput.nextDouble();
+        	periodLength = periodFileInput.nextDouble();
         	
         	// write period file
         	PrintWriter pw = new PrintWriter(periodFileName);
-        	double newPeriodLength = dataCollectionPeriods + 1;
+        	double newPeriodLength = periodLength + 1;
         	pw.print(newPeriodLength);
         	pw.close();
         	System.out.println("");
@@ -215,7 +215,7 @@ public class GuReservationSimulator {
         	
 //        	System.out.print("Enter report interval(hour) : ");
 //        	reportingCycle = input.nextDouble();
-        	reportingCycle = dataCollectionPeriods;
+        	reportingCycle = periodLength;
         	System.out.println("");
         	
         	Hashtable<String, double[]> dataRateAndTotalUsage = getPeriodicalDataUsageAndTotalUsage(numOfDevices, ueIDs);
@@ -237,7 +237,7 @@ public class GuReservationSimulator {
 				UeArr.add(new UserEquipment(ueID, OCS, "MS"));
 			}else if(indexOfSelectedReservationScheme == 3) {
 				// Inventory-based reservation scheme
-				UeArr.add(new UserEquipment(ueID, "Regular", OCS, chargingPeriods, dataCollectionPeriods, reportingCycle, totalDemands[i], dataUsages[i], "IRS"));
+				UeArr.add(new UserEquipment(ueID, "Regular", OCS, chargingPeriods, periodLength, reportingCycle, totalDemands[i], dataUsages[i], "IRS"));
 			}
 		}
 	}
@@ -348,13 +348,13 @@ public class GuReservationSimulator {
 	
 	// read periodical data rate and total usage
 	private static void readDataRateFile(int[] ueIDs, double[] dataRates, double[] totalUsageArr) throws FileNotFoundException {
-		// dataCollectionPeriods
+		// periodLength
 		String dataCollectionPeriodFileName = "";
-		int dataCollectionPeriodsInt = (int)dataCollectionPeriods;
-		if(dataCollectionPeriodsInt < 10) {
-			dataCollectionPeriodFileName = "cycleTimeOptimalGU_0" + dataCollectionPeriodsInt + ".csv";
+		int periodLengthInt = (int)periodLength;
+		if(periodLengthInt < 10) {
+			dataCollectionPeriodFileName = "cycleTimeOptimalGU_0" + periodLengthInt + ".csv";
 		}else {
-			dataCollectionPeriodFileName = "cycleTimeOptimalGU_" + dataCollectionPeriodsInt + ".csv";
+			dataCollectionPeriodFileName = "cycleTimeOptimalGU_" + periodLengthInt + ".csv";
 		}
 		
 		File file = new File(dataCollectionPeriodFileName);
@@ -414,7 +414,6 @@ public class GuReservationSimulator {
 	}
 	
 	// set the total data allowance with normal distribution
-	// 參數說明：變更 ABMF 的流量額度 (單位：MB)
 	private static double dataAllowanceSetting(int numOfDevices) {
 		/*
 		// store the data allowance of data plans in an array
@@ -446,7 +445,9 @@ public class GuReservationSimulator {
 		*/
 		
 //		return Math.ceil(numOfDevices * 500 / 4);
-		return 500;
+		// 參數說明：變更 ABMF 的流量額度 (單位：MB)
+		double totalDataAllowance = 500;
+		return totalDataAllowance;
 	}
 	
 
@@ -478,11 +479,11 @@ public class GuReservationSimulator {
         
         // 參數說明：用於史 MS 增加分配 GU 的參數
         System.out.print("Enter C : ");
-        double c = input.nextDouble();
+        double allocatedGuIncreasingFactor = input.nextDouble();
         System.out.println("");
         
         // configure online charging function for multiplicative scheme
-        OnlineChargingFunctionMultiplicativeScheme OCF = new OnlineChargingFunctionMultiplicativeScheme(defaultGU, c, chargingPeriods);
+        OnlineChargingFunctionMultiplicativeScheme OCF = new OnlineChargingFunctionMultiplicativeScheme(defaultGU, allocatedGuIncreasingFactor, chargingPeriods);
         // configure account balance management function
         AccountBalanceManagementFunction ABMF = new AccountBalanceManagementFunction(totalDataAllowance);
         
@@ -577,7 +578,7 @@ public class GuReservationSimulator {
     	pw.printf("Reservation scheme : %s\n", reservationScheme);
     	pw.printf("Monthly data allowance : %3.0f\n", totalDataAllowance);
     	pw.printf("Default GU : %5.0f\n", defaultGU);
-    	pw.println("Data collection period : " + dataCollectionPeriods);
+    	pw.println("Data collection period : " + periodLength);
     	pw.println();
 		
     	double totalSucdcessfulRate = 0;
